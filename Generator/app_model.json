@@ -1,0 +1,179 @@
+{
+  "bindings": {
+    "cloud_config": [
+      {
+        "name": "glovebox-demo",
+        "enabled": false,
+        "properties": {
+          "tenant_id": "",
+          "id_scope": "",
+          "iot_hub_central_endpoints": [
+            ""
+          ]
+        }
+      }
+    ],
+    "device_twins": [
+      {
+        "name": "DesiredTemperature",
+        "enabled": true,
+        "properties": {
+          "cloud2device": true,
+          "type": "double"
+        }
+      },
+      {
+        "name": "DesiredCO2AlertLevel",
+        "enabled": true,
+        "properties": {
+          "cloud2device": true,
+          "type": "double"
+        }
+      },
+      {
+        "name": "DesiredHumidity",
+        "enabled": false,
+        "properties": {
+          "cloud2device": true,
+          "type": "integer"
+        }
+      },
+      {
+        "name": "DesiredAlertlevel",
+        "enabled": false,
+        "properties": {
+          "cloud2device": true,
+          "type": "double"
+        }
+      },
+      {
+        "name": "ReportedTemperature",
+        "enabled": false,
+        "properties": {
+          "type": "float"
+        }
+      }
+    ],
+    "direct_methods": [
+      {
+        "name": "FanOn",
+        "enabled": true
+      },
+      {
+        "name": "FanOff",
+        "enabled": false
+      },
+      {
+        "name": "LightOn",
+        "enabled": false
+      },
+      {
+        "name": "LightOff",
+        "enabled": false
+      }
+    ],
+    "timers": [
+      {
+        "name": "MeasureTemperature",
+        "enabled": false,
+        "properties": {
+          "period": "5, 0",
+          "type": "periodic"
+        }
+      },
+      {
+        "name": "MeasureCarbonMonoxide",
+        "enabled": false,
+        "properties": {
+          "period": "5, 0",
+          "type": "oneshot"
+        }
+      }
+    ],
+    "gpio_outputs": [
+      {
+        "name": "CloudStatusLed",
+        "enabled": false,
+        "properties": {
+          "pin": "NETWORK_CONNECTED_LED",
+          "initialState": "low",
+          "invertPin": true,
+          "period": "5, 0"
+        }
+      },
+      {
+        "name": "Relay1",
+        "enabled": false,
+        "properties": {
+          "pin": "RELAY",
+          "initialState": "low",
+          "invertPin": true
+        }
+      },
+      {
+        "name": "Led1",
+        "enabled": false,
+        "properties": {
+          "pin": "LED1",
+          "initialState": "low",
+          "invertPin": true
+        }
+      }
+    ],
+    "gpio_inputs": [
+      {
+        "name": "ButtonA",
+        "enabled": false,
+        "properties": {
+          "pin": "BUTTON_A",
+          "detect": "low",
+          "period": "0, 200000000"
+        }
+      }
+    ],
+    "custom": [
+      {
+        "name": "PublishTelemetry",
+        "enabled": false,
+        "properties": {
+          "period": "15,0"
+        },
+        "signature_template": "sig_timer",
+        "handler_template": "handler_publish_telemetry",
+        "include_template": "include_publish_telemetry"
+      },
+      {
+        "name": "RestartDeviceComponents",
+        "enabled": false,
+        "components": [
+          {
+            "name": "RestartDevice",
+            "binding_template": "DIRECT_METHOD_BINDING",
+            "signature_template": "sig_direct_method",
+            "variable_template": "declare_direct_method",
+            "handler_template": "handler_restart_device",
+            "include_template": "include_restart_device"
+          },
+          {
+            "name": "DelayRestart",
+            "binding_template": "TIMER_BINDING",
+            "signature_template": "sig_timer",
+            "variable_template": "declare_timer_oneshot",
+            "timer_handler": "handler_timer_oneshot"
+          }
+        ]
+      },
+      {
+        "name": "Watchdog",
+        "enabled": false,
+        "properties": {
+          "period": "30, 0"
+        },
+        "binding_template": "TIMER_BINDING",
+        "signature_template": "sig_timer",
+        "handler_template": "handler_watchdog",
+        "include_template": "include_watchdog"
+      }
+    ]
+  }
+}

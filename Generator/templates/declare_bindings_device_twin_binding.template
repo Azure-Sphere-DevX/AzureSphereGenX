@@ -1,0 +1,3 @@
+
+// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {{ {variables} }};

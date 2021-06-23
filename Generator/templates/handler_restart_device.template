@@ -1,0 +1,37 @@
+/// <summary>
+/// Restart the Device
+/// </summary>
+static void DelayRestart_gx_handler(EventLoopTimer* eventLoopTimer)
+{{
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0)
+    {{
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }}
+    PowerManagement_ForceSystemReboot();
+}}
+
+/// <summary>
+/// Start Device Power Restart Direct Method 'ResetMethod' integer seconds eg 5
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE {name}_gx_handler(JSON_Value* json, DX_DIRECT_METHOD_BINDING* directMethodBinding, char** responseMsg)
+{{
+    static struct timespec period;
+
+    if (json_value_get_type(json) != JSONNumber) {{ return DX_METHOD_FAILED; }}
+
+    int seconds = (int)json_value_get_number(json);
+
+    if (seconds > 2 && seconds < 10)
+    {{
+        // Set One Shot DX_TIMER
+        period = (struct timespec){{ .tv_sec = seconds, .tv_nsec = 0 }};
+        dx_timerOneShotSet(&tmr_DelayRestart, &period);
+
+        return DX_METHOD_SUCCEEDED;
+    }}
+    else
+    {{
+          return DX_METHOD_FAILED;
+    }}
+}}

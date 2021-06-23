@@ -1,0 +1,6 @@
+{
+    "DEVICE_TWIN_BINDING":"dt",
+    "DIRECT_METHOD_BINDING" : "dm",
+    "GPIO_BINDING" : "gpio",
+    "TIMER_BINDING": "tmr"
+}
