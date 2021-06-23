@@ -56,7 +56,8 @@ class Builder():
                         'signature_template': component.get('signature_template'),
                         'variable_template': component.get('variable_template'),
                         'handler_template': component.get('handler_template'),
-                        'include_template': component.get('include_template')
+                        'include_template': component.get('include_template'),
+                        'properties': component.get('properties')
                     }
                     self.bindings.append(new_binding)
                     self.process_binding(new_binding)

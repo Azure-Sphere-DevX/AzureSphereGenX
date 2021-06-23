@@ -69,7 +69,7 @@
     "gpio_outputs": [
       {
         "name": "CloudStatusLed",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "low",
@@ -126,7 +126,42 @@
             "binding_template": "TIMER_BINDING",
             "signature_template": "sig_timer",
             "variable_template": "declare_timer_oneshot",
-            "timer_handler": "handler_timer_oneshot"
+            "timer_handler": "handler_timer_oneshot",
+            "properties": {
+              "pin": "RELAY",
+              "initialState": "low",
+              "invertPin": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "DirectMethodLightControl",
+        "enabled": true,
+        "components": [
+          {
+            "name": "LightOn",
+            "binding_template": "DIRECT_METHOD_BINDING",
+            "signature_template": "sig_direct_method",
+            "variable_template": "declare_direct_method",
+            "handler_template": "handler_direct_method_light_on"
+          },
+          {
+            "name": "LightOff",
+            "binding_template": "DIRECT_METHOD_BINDING",
+            "signature_template": "sig_direct_method",
+            "variable_template": "declare_direct_method",
+            "handler_template": "handler_direct_method_light_off"
+          },
+          {
+            "name": "Light1",
+            "binding_template": "GPIO_BINDING",
+            "variable_template": "declare_gpio_output",
+            "properties": {
+              "pin": "RELAY",
+              "initialState": "GPIO_Value_Low",
+              "invertPin": true
+            }
           }
         ]
       },

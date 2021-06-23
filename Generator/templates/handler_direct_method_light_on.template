@@ -1,0 +1,9 @@
+/// <summary>
+/// What is the purpose of this direct method handler function?
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE {name}_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {{
+   
+    dx_gpioOn(&gpio_Light1);
+
+    return DX_METHOD_SUCCEEDED;
+}}
