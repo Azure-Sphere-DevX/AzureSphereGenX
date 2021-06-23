@@ -100,100 +100,19 @@ int main(int argc, char* argv[]) {{
 // Main code blocks
 
 
-/// GENX_BEGIN ID:DesiredTemperature MD5:2baa5a70cc22058c360dfb287b8cbae6
+/// GENX_BEGIN ID:CloudStatusLed MD5:a29ad2e6641e7f3caf2bac107c752e47
 /// <summary>
-/// What is the purpose of this device twin handler function?
+/// Implement your timer function
 /// </summary>
-/// <param name="deviceTwinBinding"></param>
-static void DesiredTemperature_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+static void CloudStatusLed_gx_handler(EventLoopTimer *eventLoopTimer) {
+    static bool gpio_state = true;
 
-    // Checking the twinStateUpdated here will always be true.
-    // But it's useful property for other areas of your code.
-    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
-
-    double device_twin_value = *(double*)deviceTwinBinding->twinState;
-
-    if (device_twin_value > 0.0 && device_twin_value < 100.0){
-        Log_Debug("Device twin value: %f\n", device_twin_value);
-
-        // IMPLEMENT YOUR CODE HERE
-
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
     }
+
+    dx_gpioStateSet(&gpio_CloudStatusLed, gpio_state = !gpio_state);
 }
-/// GENX_END ID:DesiredTemperature
-
-
-/// GENX_BEGIN ID:DesiredCO2AlertLevel MD5:03f333afbc45929ef727eaa6cc3f6af9
-/// <summary>
-/// What is the purpose of this device twin handler function?
-/// </summary>
-/// <param name="deviceTwinBinding"></param>
-static void DesiredCO2AlertLevel_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
-
-    // Checking the twinStateUpdated here will always be true.
-    // But it's useful property for other areas of your code.
-    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
-
-    double device_twin_value = *(double*)deviceTwinBinding->twinState;
-
-    if (device_twin_value > 0.0 && device_twin_value < 100.0){
-        Log_Debug("Device twin value: %f\n", device_twin_value);
-
-        // IMPLEMENT YOUR CODE HERE
-
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
-    }
-}
-/// GENX_END ID:DesiredCO2AlertLevel
-
-
-/// GENX_BEGIN ID:FanOn MD5:28b16ab201bc15881b8c1768daf0e756
-/// <summary>
-/// What is the purpose of this direct method handler function?
-/// </summary>
-// Direct method JSON payload example {"Duration":2}:
-static DX_DIRECT_METHOD_RESPONSE_CODE FanOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
-    char duration_str[] = "Duration";
-    int requested_duration_seconds;
-
-    // Allocate and initialize a response message buffer. 
-    // The calling function is responsible for freeing the memory
-    const size_t responseLen = 100; 
-    *responseMsg = (char*)malloc(responseLen);
-    memset(*responseMsg, 0, responseLen);
-
-    JSON_Object *jsonObject = json_value_get_object(json);
-    if (jsonObject == NULL) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Invalid JSON received type.", directMethodBinding->methodName);
-        return DX_METHOD_FAILED;
-    }
-
-    // check JSON properties sent through are the correct type
-    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Incorrect JSON type.", directMethodBinding->methodName);
-        return DX_METHOD_FAILED;
-    }
-
-    requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
-    Log_Debug("Duration %d \n", requested_duration_seconds);
-
-    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Duration seconds (%d) out of range.", directMethodBinding->methodName, requested_duration_seconds);
-        return DX_METHOD_FAILED;
-    }
-
-    // IMPLEMENT YOUR ACTION HERE
-
-    snprintf(*responseMsg, responseLen, "%s called successfully", directMethodBinding->methodName);
-
-    return DX_METHOD_SUCCEEDED;
-}
-/// GENX_END ID:FanOn
+/// GENX_END ID:CloudStatusLed
 

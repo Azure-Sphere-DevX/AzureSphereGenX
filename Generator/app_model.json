@@ -16,7 +16,7 @@
     "device_twins": [
       {
         "name": "DesiredTemperature",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "cloud2device": true,
           "type": "double"
@@ -24,22 +24,6 @@
       },
       {
         "name": "DesiredCO2AlertLevel",
-        "enabled": true,
-        "properties": {
-          "cloud2device": true,
-          "type": "double"
-        }
-      },
-      {
-        "name": "DesiredHumidity",
-        "enabled": false,
-        "properties": {
-          "cloud2device": true,
-          "type": "integer"
-        }
-      },
-      {
-        "name": "DesiredAlertlevel",
         "enabled": false,
         "properties": {
           "cloud2device": true,
@@ -48,21 +32,13 @@
       },
       {
         "name": "ReportedTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "type": "float"
         }
       }
     ],
     "direct_methods": [
-      {
-        "name": "FanOn",
-        "enabled": true
-      },
-      {
-        "name": "FanOff",
-        "enabled": false
-      },
       {
         "name": "LightOn",
         "enabled": false
@@ -93,7 +69,7 @@
     "gpio_outputs": [
       {
         "name": "CloudStatusLed",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "low",
@@ -106,15 +82,6 @@
         "enabled": false,
         "properties": {
           "pin": "RELAY",
-          "initialState": "low",
-          "invertPin": true
-        }
-      },
-      {
-        "name": "Led1",
-        "enabled": false,
-        "properties": {
-          "pin": "LED1",
           "initialState": "low",
           "invertPin": true
         }
@@ -143,7 +110,7 @@
         "include_template": "include_publish_telemetry"
       },
       {
-        "name": "RestartDeviceComponents",
+        "name": "RestartDevice",
         "enabled": false,
         "components": [
           {

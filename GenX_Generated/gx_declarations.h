@@ -25,29 +25,27 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static void DesiredCO2AlertLevel_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-static void DesiredTemperature_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-static DX_DIRECT_METHOD_RESPONSE_CODE FanOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static void CloudStatusLed_gx_handler(EventLoopTimer *eventLoopTimer);
 
 
-static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_DOUBLE, .handler = DesiredTemperature_gx_handler };
-static DX_DEVICE_TWIN_BINDING dt_DesiredCO2AlertLevel = { .twinProperty = "DesiredCO2AlertLevel", .twinType = DX_TYPE_DOUBLE, .handler = DesiredCO2AlertLevel_gx_handler };
-static DX_DIRECT_METHOD_BINDING dm_FanOn = { .methodName = "FanOn", .handler = FanOn_gx_handler };
+static DX_TIMER_BINDING tmr_CloudStatusLed = { .period = {5, 0}, .name = "CloudStatusLed", .handler = CloudStatusLed_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "ReportedTemperature", .twinType = DX_TYPE_FLOAT };
+static DX_GPIO_BINDING gpio_CloudStatusLed = { .pin = NETWORK_CONNECTED_LED, .name = "CloudStatusLed", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
 
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredTemperature, &dt_DesiredCO2AlertLevel };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_ReportedTemperature };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = { &dm_FanOn };
+static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
 
 // All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
-static DX_GPIO_BINDING *gpio_bindings[] = {  };
+static DX_GPIO_BINDING *gpio_bindings[] = { &gpio_CloudStatusLed };
 
 // All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = {  };
+static DX_TIMER_BINDING *timer_bindings[] = { &tmr_CloudStatusLed };
 
 
 /****************************************************************************************

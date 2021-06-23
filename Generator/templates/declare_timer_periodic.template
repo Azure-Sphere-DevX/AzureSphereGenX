@@ -1,1 +1,1 @@
-static DX_TIMER_BINDING tmr_{name} = {{ .period = {period}, .type = {timer_type}, .name = "{name}", .handler = {name}_gx_handler }};
+static DX_TIMER_BINDING tmr_{name} = {{ .period = {period}, .name = "{name}", .handler = {name}_gx_handler }};
