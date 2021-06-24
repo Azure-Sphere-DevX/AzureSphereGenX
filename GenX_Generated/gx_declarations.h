@@ -25,14 +25,9 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
-static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
 
 
 static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "ReportedTemperature", .twinType = DX_TYPE_FLOAT };
-static DX_DIRECT_METHOD_BINDING dm_LightOn = { .methodName = "LightOn", .handler = LightOn_gx_handler };
-static DX_DIRECT_METHOD_BINDING dm_LightOff = { .methodName = "LightOff", .handler = LightOff_gx_handler };
-static DX_GPIO_BINDING gpio_Light1 = { .pin = RELAY, .name = "Light1", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
 
 
 
@@ -40,10 +35,10 @@ static DX_GPIO_BINDING gpio_Light1 = { .pin = RELAY, .name = "Light1", .directio
 static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_ReportedTemperature };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = { &dm_LightOn, &dm_LightOff };
+static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
 
 // All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
-static DX_GPIO_BINDING *gpio_bindings[] = { &gpio_Light1 };
+static DX_GPIO_BINDING *gpio_bindings[] = {  };
 
 // All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS

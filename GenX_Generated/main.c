@@ -99,29 +99,3 @@ int main(int argc, char* argv[]) {{
 
 // Main code blocks
 
-
-/// GENX_BEGIN ID:LightOff MD5:4b1ebb6dc8f4b404fcad37f5675d56b6
-/// <summary>
-/// What is the purpose of this direct method handler function?
-/// </summary>
-static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
-   
-    dx_gpioOff(&gpio_Light1);
-
-    return DX_METHOD_SUCCEEDED;
-}
-/// GENX_END ID:LightOff
-
-
-/// GENX_BEGIN ID:LightOn MD5:a6cc506448bf8457c835233f38e70172
-/// <summary>
-/// What is the purpose of this direct method handler function?
-/// </summary>
-static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
-   
-    dx_gpioOn(&gpio_Light1);
-
-    return DX_METHOD_SUCCEEDED;
-}
-/// GENX_END ID:LightOn
-
