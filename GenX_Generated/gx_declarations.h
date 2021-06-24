@@ -26,26 +26,52 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer);
+static void CloudStatusLed_gx_handler(EventLoopTimer *eventLoopTimer);
+static void DelayRestart_gx_handler(EventLoopTimer *eventLoopTimer);
+static void DesiredCO2AlertLevel_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
+static void DesiredTemperature_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static void MeasureCarbonMonoxide_gx_handler(EventLoopTimer *eventLoopTimer);
+static void MeasureTemperature_gx_handler(EventLoopTimer *eventLoopTimer);
 static void PublishTelemetry_gx_handler(EventLoopTimer *eventLoopTimer);
+static DX_DIRECT_METHOD_RESPONSE_CODE RestartDevice_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static void Watchdog_gx_handler(EventLoopTimer *eventLoopTimer);
 
 
+static DX_TIMER_BINDING tmr_ButtonA = { .period = {0, 200000000}, .name = "ButtonA", .handler = ButtonA_gx_handler };
+static DX_TIMER_BINDING tmr_CloudStatusLed = { .period = {5, 0}, .name = "CloudStatusLed", .handler = CloudStatusLed_gx_handler };
+static DX_TIMER_BINDING tmr_MeasureCarbonMonoxide = { .period = { 5, 0 }, .name = "MeasureCarbonMonoxide", .handler = MeasureCarbonMonoxide_gx_handler };
+static DX_TIMER_BINDING tmr_MeasureTemperature = { .period = { 5, 0 }, .name = "MeasureTemperature", .handler = MeasureTemperature_gx_handler };
 static DX_TIMER_BINDING tmr_PublishTelemetry = { .period = {15,0}, .name = "PublishTelemetry", .handler = PublishTelemetry_gx_handler };
+static DX_TIMER_BINDING tmr_Watchdog = { .period = {30, 0}, .name = "Watchdog", .handler = Watchdog_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_DOUBLE, .handler = DesiredTemperature_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_DesiredCO2AlertLevel = { .twinProperty = "DesiredCO2AlertLevel", .twinType = DX_TYPE_DOUBLE, .handler = DesiredCO2AlertLevel_gx_handler };
 static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "ReportedTemperature", .twinType = DX_TYPE_FLOAT };
+static DX_DIRECT_METHOD_BINDING dm_LightOn = { .methodName = "LightOn", .handler = LightOn_gx_handler };
+static DX_DIRECT_METHOD_BINDING dm_LightOff = { .methodName = "LightOff", .handler = LightOff_gx_handler };
+static DX_GPIO_BINDING gpio_ButtonA = { .pin = BUTTON_A, .name = "ButtonA", .direction = DX_INPUT };
+static DX_GPIO_BINDING gpio_CloudStatusLed = { .pin = NETWORK_CONNECTED_LED, .name = "CloudStatusLed", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
+static DX_GPIO_BINDING gpio_Relay1 = { .pin = RELAY, .name = "Relay1", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
+static DX_DIRECT_METHOD_BINDING dm_RestartDevice = { .methodName = "RestartDevice", .handler = RestartDevice_gx_handler };
+static DX_TIMER_BINDING tmr_DelayRestart = { .name = "DelayRestart", .handler = DelayRestart_gx_handler };
+static DX_GPIO_BINDING gpio_Light1 = { .pin = RELAY, .name = "Light1", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
 
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_ReportedTemperature };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredTemperature, &dt_DesiredCO2AlertLevel, &dt_ReportedTemperature };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
+static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = { &dm_LightOn, &dm_LightOff, &dm_RestartDevice };
 
 // All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
-static DX_GPIO_BINDING *gpio_bindings[] = {  };
+static DX_GPIO_BINDING *gpio_bindings[] = { &gpio_ButtonA, &gpio_CloudStatusLed, &gpio_Relay1, &gpio_Light1 };
 
 // All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = { &tmr_PublishTelemetry };
+static DX_TIMER_BINDING *timer_bindings[] = { &tmr_ButtonA, &tmr_CloudStatusLed, &tmr_MeasureCarbonMonoxide, &tmr_MeasureTemperature, &tmr_PublishTelemetry, &tmr_Watchdog, &tmr_DelayRestart };
 
 
 /****************************************************************************************

@@ -3,7 +3,7 @@
     "cloud_config": [
       {
         "name": "glovebox-demo",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "tenant_id": "",
           "id_scope": "",
@@ -16,7 +16,7 @@
     "device_twins": [
       {
         "name": "DesiredTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "cloud2device": true,
           "type": "double"
@@ -24,7 +24,7 @@
       },
       {
         "name": "DesiredCO2AlertLevel",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "cloud2device": true,
           "type": "double"
@@ -41,17 +41,17 @@
     "direct_methods": [
       {
         "name": "LightOn",
-        "enabled": false
+        "enabled": true
       },
       {
         "name": "LightOff",
-        "enabled": false
+        "enabled": true
       }
     ],
     "timers": [
       {
         "name": "MeasureTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "5, 0",
           "type": "periodic"
@@ -59,7 +59,7 @@
       },
       {
         "name": "MeasureCarbonMonoxide",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "5, 0",
           "type": "oneshot"
@@ -69,7 +69,7 @@
     "gpio_outputs": [
       {
         "name": "CloudStatusLed",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "low",
@@ -79,7 +79,7 @@
       },
       {
         "name": "Relay1",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "RELAY",
           "initialState": "low",
@@ -90,7 +90,7 @@
     "gpio_inputs": [
       {
         "name": "ButtonA",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "BUTTON_A",
           "detect": "low",
@@ -106,20 +106,20 @@
           "period": "15,0"
         },
         "signature_template": "sig_timer",
-        "handler_template": "c_handler_publish_telemetry",
-        "include_template": "c_include_publish_telemetry"
+        "handler_template": "c_publish_telemetry_handler",
+        "include_template": "c_publish_telemetry_include"
       },
       {
         "name": "RestartDevice",
-        "enabled": false,
+        "enabled": true,
         "components": [
           {
             "name": "RestartDevice",
             "binding_template": "DIRECT_METHOD_BINDING",
             "signature_template": "sig_direct_method",
             "variable_template": "declare_direct_method",
-            "handler_template": "c_handler_restart_device",
-            "include_template": "c_include_restart_device"
+            "handler_template": "c_restart_device_handler",
+            "include_template": "c_restart_device_include"
           },
           {
             "name": "DelayRestart",
@@ -137,21 +137,21 @@
       },
       {
         "name": "DirectMethodLightControl",
-        "enabled": false,
+        "enabled": true,
         "components": [
           {
             "name": "LightOn",
             "binding_template": "DIRECT_METHOD_BINDING",
             "signature_template": "sig_direct_method",
             "variable_template": "declare_direct_method",
-            "handler_template": "c_handler_direct_method_light_on"
+            "handler_template": "c_direct_method_light_on_handler"
           },
           {
             "name": "LightOff",
             "binding_template": "DIRECT_METHOD_BINDING",
             "signature_template": "sig_direct_method",
             "variable_template": "declare_direct_method",
-            "handler_template": "c_handler_direct_method_light_off"
+            "handler_template": "c_direct_method_light_off_handler"
           },
           {
             "name": "Light1",
@@ -167,14 +167,14 @@
       },
       {
         "name": "Watchdog",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "30, 0"
         },
         "binding_template": "TIMER_BINDING",
         "signature_template": "sig_timer",
-        "handler_template": "c_handler_watchdog",
-        "include_template": "c_include_watchdog"
+        "handler_template": "c_watchdog_handler",
+        "include_template": "c_watchdog_include"
       }
     ]
   }
