@@ -11,9 +11,6 @@
 
 static char gx_{name}Buffer[{name}_JSON_MESSAGE_LENGTH] = {{0}};
 
-static const char *gx_{name}Template =
-    "{{ \"Temperature\":%3.2f, \"Humidity\":%3.1f, \"Pressure\":%3.1f }}";
-
 static DX_MESSAGE_PROPERTY *gx_{name}MessageProperties[] = {{
     &(DX_MESSAGE_PROPERTY){{.key = "appid", .value = "hvac"}},
     &(DX_MESSAGE_PROPERTY){{.key = "type", .value = "telemetry"}},

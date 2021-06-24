@@ -11,9 +11,6 @@
 
 static char gx_PublishTelemetryBuffer[PublishTelemetry_JSON_MESSAGE_LENGTH] = {0};
 
-static const char *gx_PublishTelemetryTemplate =
-    "{ \"Temperature\":%3.2f, \"Humidity\":%3.1f, \"Pressure\":%3.1f }";
-
 static DX_MESSAGE_PROPERTY *gx_PublishTelemetryMessageProperties[] = {
     &(DX_MESSAGE_PROPERTY){.key = "appid", .value = "hvac"},
     &(DX_MESSAGE_PROPERTY){.key = "type", .value = "telemetry"},

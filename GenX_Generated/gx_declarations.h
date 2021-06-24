@@ -6,6 +6,7 @@
 #include "dx_config.h"
 #include "dx_exit_codes.h"
 #include "dx_gpio.h"
+#include "dx_json_serializer.h"
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_version.h"
@@ -25,8 +26,10 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static void PublishTelemetry_gx_handler(EventLoopTimer *eventLoopTimer);
 
 
+static DX_TIMER_BINDING tmr_PublishTelemetry = { .period = {15,0}, .name = "PublishTelemetry", .handler = PublishTelemetry_gx_handler };
 static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "ReportedTemperature", .twinType = DX_TYPE_FLOAT };
 
 
@@ -42,7 +45,7 @@ static DX_GPIO_BINDING *gpio_bindings[] = {  };
 
 // All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = {  };
+static DX_TIMER_BINDING *timer_bindings[] = { &tmr_PublishTelemetry };
 
 
 /****************************************************************************************

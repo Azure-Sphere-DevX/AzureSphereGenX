@@ -101,7 +101,7 @@
     "custom": [
       {
         "name": "PublishTelemetry",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "15,0"
         },

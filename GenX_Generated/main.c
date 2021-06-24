@@ -99,3 +99,45 @@ int main(int argc, char* argv[]) {{
 
 // Main code blocks
 
+
+/// GENX_BEGIN ID:PublishTelemetry MD5:77c3b462261d8cf56ea1b8040788d6a8
+/// <summary>
+/// Publish environment sensor telemetry to IoT Hub/Central
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void PublishTelemetry_gx_handler(EventLoopTimer *eventLoopTimer) {
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    float temperature = 30.0f;
+    float humidity = 60.0f;
+    float pressure = 1010.0f;
+
+    float ReportedTemperature_value = 30.0f;
+
+    if (dx_isAzureConnected()) {
+
+        // Serialize telemetry as JSON
+        bool serialization_result = dx_jsonSerialize(gx_PublishTelemetryBuffer, sizeof(gx_PublishTelemetryBuffer), 3, 
+            DX_JSON_DOUBLE, "Temperature", temperature, 
+            DX_JSON_DOUBLE, "Humidity", humidity,
+            DX_JSON_DOUBLE, "Pressure", pressure);
+
+        if (serialization_result) {
+            Log_Debug("%s\n", gx_PublishTelemetryBuffer);
+            
+            dx_azurePublish(gx_PublishTelemetryBuffer, strlen(gx_PublishTelemetryBuffer), gx_PublishTelemetryMessageProperties, 
+                            NELEMS(gx_PublishTelemetryMessageProperties), &gx_PublishTelemetryContentProperties);
+        
+        } else {
+            Log_Debug("gx_PublishTelemetryBuffer to small to serialize JSON\n");
+        }
+
+        dx_deviceTwinReportState(&dt_ReportedTemperature, &ReportedTemperature_value);     // DX_TYPE_FLOAT
+    }
+}
+/// GENX_END ID:PublishTelemetry
+

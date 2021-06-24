@@ -16,17 +16,20 @@ static void {name}_gx_handler(EventLoopTimer *eventLoopTimer) {{
 {device_twin_variables}
     if (dx_isAzureConnected()) {{
 
-        // Create JSON telemetry message
-        int length = snprintf(gx_{name}Buffer, sizeof(gx_{name}Buffer), gx_{name}Template, temperature, humidity, pressure);
+        // Serialize telemetry as JSON
+        bool serialization_result = dx_jsonSerialize(gx_{name}Buffer, sizeof(gx_{name}Buffer), 3, 
+            DX_JSON_DOUBLE, "Temperature", temperature, 
+            DX_JSON_DOUBLE, "Humidity", humidity,
+            DX_JSON_DOUBLE, "Pressure", pressure);
 
-        if (length > 0 && length < sizeof(gx_{name}Buffer)) {{
+        if (serialization_result) {{
             Log_Debug("%s\n", gx_{name}Buffer);
             
-            dx_azurePublish(gx_{name}Buffer, (size_t)length, gx_{name}MessageProperties, 
+            dx_azurePublish(gx_{name}Buffer, strlen(gx_{name}Buffer), gx_{name}MessageProperties, 
                             NELEMS(gx_{name}MessageProperties), &gx_{name}ContentProperties);
         
         }} else {{
-            Log_Debug("gx_{name}Buffer to small to serial JSON\n");
+            Log_Debug("gx_{name}Buffer to small to serialize JSON\n");
         }}
 
 {device_twins_updates}    }}
