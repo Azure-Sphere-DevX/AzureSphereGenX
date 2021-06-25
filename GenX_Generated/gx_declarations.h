@@ -29,22 +29,13 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static bool DeferredUpdateCalculate_gx_handler(unsigned int max_deferral_time_in_minutes);
-static void DeferredUpdateNotification_gx_handler(SysEvent_UpdateType type, const char* typeDescription, SysEvent_Status status, const char* statusDescription);
-static void DesiredTemperature_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-static void DeviceStartup_gx_handler(EventLoopTimer *eventLoopTimer);
 
 
-static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_gx_handler };
-static DX_TIMER_BINDING tmr_DeviceStartup = { .name = "DeviceStartup", .handler = DeviceStartup_gx_handler };
-static DX_DEVICE_TWIN_BINDING dt_DeviceStartUtc = { .twinProperty = "DeviceStartUtc", .twinType = DX_TYPE_STRING };
-static DX_DEVICE_TWIN_BINDING dt_SoftwareVersion = { .twinProperty = "SoftwareVersion", .twinType = DX_TYPE_STRING };
-static DX_DEVICE_TWIN_BINDING dt_DeferredUpdateStatus = { .twinProperty = "DeferredUpdateStatus", .twinType = DX_TYPE_STRING };
 
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredTemperature, &dt_DeviceStartUtc, &dt_SoftwareVersion, &dt_DeferredUpdateStatus };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
 static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
@@ -54,7 +45,7 @@ static DX_GPIO_BINDING *gpio_bindings[] = {  };
 
 // All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = { &tmr_DeviceStartup };
+static DX_TIMER_BINDING *timer_bindings[] = {  };
 
 
 /****************************************************************************************

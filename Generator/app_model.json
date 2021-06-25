@@ -16,7 +16,7 @@
     "device_twins": [
       {
         "name": "DesiredTemperature",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "cloud2device": true,
           "type": "float"
@@ -195,7 +195,7 @@
       {
         "name": "ReportStartupState",
         "description": "Report start utc time and software version",
-        "enabled": true,
+        "enabled": false,
         "components": [
           {
             "name": "DeviceStartup",
@@ -225,7 +225,7 @@
       {
         "name": "DeferredUpdate",
         "description": "Deferred update framework and a device twin to report status",
-        "enabled": true,
+        "enabled": false,
         "include_template": "a_deferred_update_include",
         "signature_template": "a_deferred_update_signature",
         "components": [
