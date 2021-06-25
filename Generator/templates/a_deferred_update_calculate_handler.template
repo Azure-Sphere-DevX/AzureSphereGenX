@@ -1,9 +1,9 @@
 /// <summary>
 /// Algorithm to determine if a deferred update can proceed
 /// </summary>
-/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer the update</param>
-/// <returns>true to start update, false to defer update</returns>
-static bool DeferredUpdateCalculate_gx_handler(unsigned int max_deferral_time_in_minutes) {{
+/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer</param>
+/// <returns>Return 0 to start update, return greater than zero to defer</returns>
+static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes) {{
 	// make deferral update decision
 	// Examples 
 	// - what is local time - could be as simple as GMT + 8hrs is midnight
@@ -25,5 +25,10 @@ static bool DeferredUpdateCalculate_gx_handler(unsigned int max_deferral_time_in
 	// do update between 1am and 5am perth time = 12am and 3am sydney time
 	// this gives 3 hour window for update
 
-	return (t->tm_hour >= 1 && t->tm_hour <= 5);
+	    // Return zero to allow update, greater than zero to defer the update
+    if (t->tm_hour >= 1 && t->tm_hour <= 5) {{
+        return 0;
+    }} else {{
+        return 30; // defer update for 30 minutes
+	}}
 }}

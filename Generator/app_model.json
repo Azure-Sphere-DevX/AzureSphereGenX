@@ -84,7 +84,7 @@
         "properties": {
           "period": "5, 0",
           "type": "oneshot",
-          "start": true
+          "autostart": true
         }
       },
       {
@@ -174,7 +174,7 @@
             "variable_template": "declare_gpio_output",
             "properties": {
               "pin": "RELAY",
-              "initialState": "GPIO_Value_High",
+              "initialState": "GPIO_Value_Low",
               "invertPin": true
             }
           }
@@ -228,6 +228,14 @@
         "enabled": false,
         "include_template": "a_deferred_update_include",
         "signature_template": "a_deferred_update_signature",
+        "manifest": [
+          {
+            "SystemEventNotifications": true
+          },
+          {
+            "SoftwareUpdateDeferral": true
+          }
+        ],
         "components": [
           {
             "name": "DeferredUpdateCalculate",
