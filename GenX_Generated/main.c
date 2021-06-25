@@ -34,7 +34,6 @@
  ************************************************************************************************/
 
 #include "gx_declarations.h"
-#include "gx_includes.h"
 
 #include "applibs_versions.h"
 #include <applibs/log.h>
@@ -42,23 +41,20 @@
 #include <stdio.h>
 #include <time.h>
 
-#define APPLICATION_VERSION "1.0"
+#define APPLICATION_VERSION "1.5"
 const char PNP_MODEL_ID[] = "dtmi:com:example:application;1";
 const char NETWORK_INTERFACE[] = "wlan0";
+
+
 
 /// <summary>
 ///  Initialize gpios, device twins, direct methods, timers.
 /// </summary>
 static void InitPeripheralAndHandlers(void) {{
 	dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
-
-    #ifdef GX_AZURE_IOT
-        dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
-    #else
-        gx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
-    #endif // GX_AZURE_IOT
-
 	gx_initPeripheralAndHandlers();
+
+	//dx_timerOneShotSet(&tmr_ReportStartTime, &(struct timespec) { 5, 0 });
 
 	// Uncomment the StartWatchdog when ready for production
 	// StartWatchdog();
@@ -98,4 +94,104 @@ int main(int argc, char* argv[]) {{
 }}
 
 // Main code blocks
+
+
+/// GENX_BEGIN ID:DeferredUpdateCalculate MD5:3dc655c0544d93b553f256e4c73f3859
+/// <summary>
+/// Algorithm to determine if a deferred update can proceed
+/// </summary>
+/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer the update</param>
+/// <returns>true to start update, false to defer update</returns>
+static bool DeferredUpdateCalculate_gx_handler(unsigned int max_deferral_time_in_minutes) {
+	// make deferral update decision
+	// Examples 
+	// - what is local time - could be as simple as GMT + 8hrs is midnight
+	// - Is it dark
+	// - What is the device doing
+	// - recent activities
+	// - Orientation of the device
+
+	time_t now = time(NULL);
+	struct tm* t = gmtime(&now);
+
+	// this would work well enough if all devices AU
+	// based on perth time zone GMT + 8 AWST
+	// otherwise use geotime library https://github.com/Azure/azure-sphere-gallery/tree/main/SetTimeFromLocation
+
+	t->tm_hour += 10;
+	t->tm_hour = t->tm_hour % 24;
+
+	// do update between 1am and 5am perth time = 12am and 3am sydney time
+	// this gives 3 hour window for update
+
+	return (t->tm_hour >= 1 && t->tm_hour <= 5);
+}
+/// GENX_END ID:DeferredUpdateCalculate
+
+
+/// GENX_BEGIN ID:DeferredUpdateNotification MD5:957c99508d5fa2d5521482ea5f0ced22
+static void DeferredUpdateNotification_gx_handler(SysEvent_UpdateType type, const char* typeDescription, SysEvent_Status status, const char* statusDescription) {
+	// do something here like update a device twin before updating
+	char msgBuffer[128];
+	char utc[40];
+
+	snprintf(msgBuffer, sizeof(msgBuffer), "%s, Type: %s, Status %s", dx_getCurrentUtc(utc, sizeof(utc)), typeDescription, statusDescription);
+
+	dx_deviceTwinReportState(&dt_DeferredUpdateStatus, msgBuffer);
+}
+/// GENX_END ID:DeferredUpdateNotification
+
+
+/// GENX_BEGIN ID:DesiredTemperature MD5:e37563137d58088626040950f1b177e2
+/// <summary>
+/// What is the purpose of this device twin handler function?
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void DesiredTemperature_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    float device_twin_value = *(float*)deviceTwinBinding->twinState;
+
+    if (device_twin_value > 0.0f && device_twin_value < 100.0f){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+
+        // IMPLEMENT YOUR CODE HERE
+
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+/// GENX_END ID:DesiredTemperature
+
+
+/// GENX_BEGIN ID:DeviceStartup MD5:bfc6e9de5655e78aae364f9d6b0be6fa
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void DeviceStartup_gx_handler(EventLoopTimer *eventLoopTimer) {
+   if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+       dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+       return;
+   }
+
+	char version[60];
+	char utc[30];
+
+	if (dx_isAzureConnected()) {
+
+		dx_deviceTwinReportState(&dt_DeviceStartUtc, dx_getCurrentUtc(utc, sizeof(utc)));
+
+		snprintf(version, sizeof(version), "Application version: %s, DevX version: %s", APPLICATION_VERSION, AZURE_SPHERE_DEVX_VERSION);
+		dx_deviceTwinReportState(&dt_SoftwareVersion, version);
+
+	} else {
+		dx_timerOneShotSet(&tmr_DeviceStartup, &(struct timespec) { 5, 0 });
+	}
+}
+/// GENX_END ID:DeviceStartup
 

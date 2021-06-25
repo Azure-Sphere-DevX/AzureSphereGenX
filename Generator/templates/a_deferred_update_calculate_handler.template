@@ -1,0 +1,29 @@
+/// <summary>
+/// Algorithm to determine if a deferred update can proceed
+/// </summary>
+/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer the update</param>
+/// <returns>true to start update, false to defer update</returns>
+static bool DeferredUpdateCalculate_gx_handler(unsigned int max_deferral_time_in_minutes) {{
+	// make deferral update decision
+	// Examples 
+	// - what is local time - could be as simple as GMT + 8hrs is midnight
+	// - Is it dark
+	// - What is the device doing
+	// - recent activities
+	// - Orientation of the device
+
+	time_t now = time(NULL);
+	struct tm* t = gmtime(&now);
+
+	// this would work well enough if all devices AU
+	// based on perth time zone GMT + 8 AWST
+	// otherwise use geotime library https://github.com/Azure/azure-sphere-gallery/tree/main/SetTimeFromLocation
+
+	t->tm_hour += 10;
+	t->tm_hour = t->tm_hour % 24;
+
+	// do update between 1am and 5am perth time = 12am and 3am sydney time
+	// this gives 3 hour window for update
+
+	return (t->tm_hour >= 1 && t->tm_hour <= 5);
+}}

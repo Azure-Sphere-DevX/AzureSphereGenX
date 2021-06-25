@@ -8,9 +8,6 @@ class Builder():
         self.variables_block = variables_block
         self.handlers_block = handlers_block
 
-        self.device_twin_types = {"integer": "DX_TYPE_INT", "float": "DX_TYPE_FLOAT", "double": "DX_TYPE_DOUBLE",
-                                  "boolean": "DX_TYPE_BOOL",  "string": "DX_TYPE_STRING"}
-
         self.device_twin_template = {"integer": "handler_device_twin_int", "float": "handler_device_twin_float",
                                      "double": "handler_device_twin_double", "boolean": "handler_device_twin_bool",
                                      "string": "handler_device_twin_string"}
@@ -22,8 +19,6 @@ class Builder():
             
             key = binding.get('name')
             properties = binding.get('properties')            
-
-            properties.update({'twin_type': self.device_twin_types[properties.get('type')]})
 
             if properties.get("cloud2device") == True:
 

@@ -1,0 +1,9 @@
+static void DeferredUpdateNotification_gx_handler(SysEvent_UpdateType type, const char* typeDescription, SysEvent_Status status, const char* statusDescription) {{
+	// do something here like update a device twin before updating
+	char msgBuffer[128];
+	char utc[40];
+
+	snprintf(msgBuffer, sizeof(msgBuffer), "%s, Type: %s, Status %s", dx_getCurrentUtc(utc, sizeof(utc)), typeDescription, statusDescription);
+
+	dx_deviceTwinReportState(&dt_DeferredUpdateStatus, msgBuffer);
+}}

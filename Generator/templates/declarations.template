@@ -10,6 +10,9 @@
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_version.h"
+#include "dx_deferred_update.h"
+
+#include "gx_includes.h"
 
 #include <time.h>
 

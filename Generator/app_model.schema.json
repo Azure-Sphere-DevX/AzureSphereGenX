@@ -245,9 +245,9 @@
 										"$id": "#root/bindings/gpio_outputs/items/properties/initialState", 
 										"title": "Initialstate", 
 										"type": "string",
-										"default": "low",
+										"default": "GPIO_Value_Low",
 										"examples": [
-											"low", "high"
+											"GPIO_Value_Low", "GPIO_Value_High"
 										],
 										"pattern": "^.*$"
 									},
@@ -332,9 +332,9 @@
 										"$id": "#root/bindings/gpio_inputs/items/properties/detect", 
 										"title": "Detect", 
 										"type": "string",
-										"default": "low",
+										"default": "DX_GPIO_DETECT_LOW",
 										"examples": [
-											"low", "high", "both"
+											"DX_GPIO_DETECT_LOW", "DX_GPIO_DETECT_HIGH", "DX_GPIO_DETECT_BOTH"
 										],
 										"pattern": "^.*$"
 									},

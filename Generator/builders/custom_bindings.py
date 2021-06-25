@@ -62,8 +62,8 @@ class Builder():
                     self.bindings.append(new_binding)
                     self.process_binding(new_binding)
 
-            else:
-                self.process_binding(binding)
+            
+            self.process_binding(binding)
 
 
             

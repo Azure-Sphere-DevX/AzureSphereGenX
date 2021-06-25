@@ -16,10 +16,10 @@
     "device_twins": [
       {
         "name": "DesiredTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "cloud2device": true,
-          "type": "double"
+          "type": "float"
         }
       },
       {
@@ -35,6 +35,27 @@
         "enabled": false,
         "properties": {
           "type": "float"
+        }
+      },
+      {
+        "name": "DeferredUpdateStatus",
+        "enabled": false,
+        "properties": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "DeviceStartUtc",
+        "enabled": false,
+        "properties": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "SoftwareVersion",
+        "enabled": false,
+        "properties": {
+          "type": "string"
         }
       }
     ],
@@ -62,7 +83,17 @@
         "enabled": false,
         "properties": {
           "period": "5, 0",
-          "type": "oneshot"
+          "type": "oneshot",
+          "start": true
+        }
+      },
+      {
+        "name": "ReportStartTime",
+        "enabled": false,
+        "properties": {
+          "period": "5, 0",
+          "type": "oneshot",
+          "start": true
         }
       }
     ],
@@ -72,7 +103,7 @@
         "enabled": false,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
-          "initialState": "low",
+          "initialState": "GPIO_Value_Low",
           "invertPin": true,
           "period": "5, 0"
         }
@@ -82,7 +113,7 @@
         "enabled": false,
         "properties": {
           "pin": "RELAY",
-          "initialState": "low",
+          "initialState": "GPIO_Value_Low",
           "invertPin": true
         }
       }
@@ -93,7 +124,7 @@
         "enabled": false,
         "properties": {
           "pin": "BUTTON_A",
-          "detect": "low",
+          "detect": "DX_GPIO_DETECT_BOTH",
           "period": "0, 200000000"
         }
       }
@@ -112,31 +143,15 @@
       {
         "name": "RestartDevice",
         "enabled": false,
-        "components": [
-          {
-            "name": "RestartDevice",
-            "binding_template": "DIRECT_METHOD_BINDING",
-            "signature_template": "sig_direct_method",
-            "variable_template": "declare_direct_method",
-            "handler_template": "c_restart_device_handler",
-            "include_template": "c_restart_device_include"
-          },
-          {
-            "name": "DelayRestart",
-            "binding_template": "TIMER_BINDING",
-            "signature_template": "sig_timer",
-            "variable_template": "declare_timer_oneshot",
-            "timer_handler": "handler_timer_oneshot",
-            "properties": {
-              "pin": "RELAY",
-              "initialState": "low",
-              "invertPin": true
-            }
-          }
-        ]
+        "binding_template": "DIRECT_METHOD_BINDING",
+        "signature_template": "sig_direct_method",
+        "variable_template": "declare_direct_method",
+        "handler_template": "c_restart_device_handler",
+        "include_template": "c_restart_device_include"
       },
       {
         "name": "DirectMethodLightControl",
+        "description": "Direct methods to turn light/relay on and off create a light/relay gpio binding",
         "enabled": false,
         "components": [
           {
@@ -159,7 +174,7 @@
             "variable_template": "declare_gpio_output",
             "properties": {
               "pin": "RELAY",
-              "initialState": "GPIO_Value_Low",
+              "initialState": "GPIO_Value_High",
               "invertPin": true
             }
           }
@@ -167,6 +182,7 @@
       },
       {
         "name": "Watchdog",
+        "description": "Watchdog on a 30 second refresh cadence",
         "enabled": false,
         "properties": {
           "period": "30, 0"
@@ -175,6 +191,62 @@
         "signature_template": "sig_timer",
         "handler_template": "c_watchdog_handler",
         "include_template": "c_watchdog_include"
+      },
+      {
+        "name": "ReportStartupState",
+        "description": "Report start utc time and software version",
+        "enabled": true,
+        "components": [
+          {
+            "name": "DeviceStartup",
+            "binding_template": "TIMER_BINDING",
+            "signature_template": "sig_timer",
+            "handler_template": "b_device_startup_handler",
+            "variable_template": "declare_timer_oneshot"
+          },
+          {
+            "name": "DeviceStartUtc",
+            "binding_template": "DEVICE_TWIN_BINDING",
+            "variable_template": "declare_device_twin",
+            "properties": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SoftwareVersion",
+            "binding_template": "DEVICE_TWIN_BINDING",
+            "variable_template": "declare_device_twin",
+            "properties": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      {
+        "name": "DeferredUpdate",
+        "description": "Deferred update framework and a device twin to report status",
+        "enabled": true,
+        "include_template": "a_deferred_update_include",
+        "signature_template": "a_deferred_update_signature",
+        "components": [
+          {
+            "name": "DeferredUpdateCalculate",
+            "handler_template": "a_deferred_update_calculate_handler"
+          },
+          {
+            "name": "DeferredUpdateNotification",
+            "handler_template": "a_deferred_update_notification_handler"
+          },
+          {
+            "name": "DeferredUpdateStatus",
+            "binding_template": "DEVICE_TWIN_BINDING",
+            "variable_template": "declare_device_twin",
+            "properties": {
+              "type": "string",
+              "cloud2device": false
+            }
+          }
+        ]
       }
     ]
   }

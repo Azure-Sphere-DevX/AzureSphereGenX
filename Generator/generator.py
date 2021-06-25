@@ -62,10 +62,10 @@ def load_bindings():
     builders = [dt, dm, timers, gpio_input, gpio_output, general]
 
 
-def get_value(properties, key):
+def get_value(properties, key, default):
     if properties is None or key is None:
-        return ""
-    return "" if properties.get(key) is None else properties.get(key)
+        return default
+    return properties.get(key, default)
 
 
 def write_comment_block(f, msg):
@@ -110,7 +110,7 @@ def render_timer_block(f):
         binding_variables.update({binding: var_list})
 
         if properties is not None:
-            period = "{0, 0}" if get_value(properties, 'period') == "" else get_value(properties, 'period')
+            period = get_value(properties, 'period', '{0, 0}')
             timer_type = 'DX_PERIODIC' if properties.get('type', 'periodic') == 'periodic' else 'DX_ONESHOT'
             template_key = var.get('timer_template')
             f.write(templates[template_key].format(name=name, period=period, timer_type=timer_type,
@@ -119,6 +119,9 @@ def render_timer_block(f):
 
 
 def render_variable_block(f):
+    device_twin_types = {"integer": "DX_TYPE_INT", "float": "DX_TYPE_FLOAT", "double": "DX_TYPE_DOUBLE",
+                            "boolean": "DX_TYPE_BOOL",  "string": "DX_TYPE_STRING"}
+
     for item in variables_block:
         var = variables_block.get(item)
         binding = var.get('binding')
@@ -132,15 +135,20 @@ def render_variable_block(f):
         var_list.append(name)
         binding_variables.update({binding: var_list})
 
-        pin = get_value(properties, 'pin')
-        initialState = get_value(properties, 'initialState')
-        invert = "true" if get_value(properties, 'invertPin') else "false"
-        twin_type = get_value(properties, 'twin_type')
+        pin = get_value(properties, 'pin', 'GX_PIN_NOT_DECLARED_IN_GENX_MODEL')
+        initialState = get_value(properties, 'initialState', 'GPIO_Value_Low')
+        invert = "true" if get_value(properties, 'invertPin', True) else "false"
+
+        twin_type = get_value(properties, 'type', None)
+        twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
+
+        detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
 
         f.write(templates[template_key].format(
             name=name, pin=pin,
             initialState=initialState,
             invert=invert,
+            detect=detect,
             twin_type=twin_type
         ))
 

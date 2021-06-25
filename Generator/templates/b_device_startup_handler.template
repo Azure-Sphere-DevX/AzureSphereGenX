@@ -1,0 +1,23 @@
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void {name}_gx_handler(EventLoopTimer *eventLoopTimer) {{
+   if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
+       dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+       return;
+   }}
+
+	char version[60];
+	char utc[30];
+
+	if (dx_isAzureConnected()) {{
+
+		dx_deviceTwinReportState(&dt_DeviceStartUtc, dx_getCurrentUtc(utc, sizeof(utc)));
+
+		snprintf(version, sizeof(version), "Application version: %s, DevX version: %s", APPLICATION_VERSION, AZURE_SPHERE_DEVX_VERSION);
+		dx_deviceTwinReportState(&dt_SoftwareVersion, version);
+
+	}} else {{
+		dx_timerOneShotSet(&tmr_{name}, &(struct timespec) {{ 5, 0 }});
+	}}
+}}

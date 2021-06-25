@@ -7,8 +7,6 @@ class Builder():
         self.handlers_block = handlers_block
         self.timer_block = timer_block
 
-        self.gpio_init = {"low": "GPIO_Value_Low", "high": "GPIO_Value_High"}
-
     def get_value(self, properties, key):
         return "" if properties.get(key) is None else properties.get(key)
 
@@ -17,9 +15,7 @@ class Builder():
             binding.update({'binding': 'GPIO_BINDING'})
 
             key = binding.get('name')
-            properties = binding.get('properties')     
-
-            properties.update({"initialState": self.gpio_init.get(self.get_value(properties, 'initialState')) if self.get_value(properties, 'initialState') != "" else ""})
+            properties = binding.get('properties')
 
             binding.update({"variable_template": 'declare_gpio_output'})
             self.variables_block.update({key: binding})
