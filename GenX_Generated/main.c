@@ -54,8 +54,6 @@ static void InitPeripheralAndHandlers(void) {{
 	dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
 	gx_initPeripheralAndHandlers();
 
-	//dx_timerOneShotSet(&tmr_ReportStartTime, &(struct timespec) { 5, 0 });
-
 	// Uncomment the StartWatchdog when ready for production
 	// StartWatchdog();
 }}
@@ -94,4 +92,52 @@ int main(int argc, char* argv[]) {{
 }}
 
 // Main code blocks
+
+
+/// GENX_BEGIN ID:DeferredUpdateCalculate MD5:1228ab408e101ae072880291ce561421
+/// <summary>
+/// Determine whether or not to defer an update
+/// </summary>
+/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer</param>
+/// <returns>Return 0 to start update, return greater than zero to defer</returns>
+static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+	SysEvent_Status status, const char* typeDescription,
+	const char* statusDescription) {
+
+	uint32_t requested_minutes = 0;
+	time_t now = time(NULL);
+	struct tm* t = gmtime(&now);
+	char msgBuffer[128];
+	char utc[40];
+
+	// UTC +10 would work well for devices in Australia
+	t->tm_hour += 10;
+	t->tm_hour = t->tm_hour % 24;
+
+	// Set requested_minutes to zero to allow update, greater than zero to defer the update
+	requested_minutes = t->tm_hour >= 1 && t->tm_hour <= 5 ? 0 : 10;
+
+	snprintf(msgBuffer, sizeof(msgBuffer), "Utc: %s, Type: %s, Status: %s, Max defer minutes: %i, Requested minutes: %i", 
+		dx_getCurrentUtc(utc, sizeof(utc)), typeDescription, statusDescription, max_deferral_time_in_minutes, requested_minutes);
+
+	dx_deviceTwinReportState(&dt_DeferredUpdateRequest, msgBuffer);
+
+	return requested_minutes;
+}
+/// GENX_END ID:DeferredUpdateCalculate
+
+
+/// GENX_BEGIN ID:DeferredUpdateNotification MD5:548e7399dbcdc65dd44c4c79def80d3f
+static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+	SysEvent_Status status, const char* typeDescription, const char* statusDescription) {
+
+	// do something here like update a device twin before updating
+	char msgBuffer[128];
+	char utc[40];
+
+	snprintf(msgBuffer, sizeof(msgBuffer), "Utc: %s, Type: %s, Status: %s, Max defer minutes: %i", dx_getCurrentUtc(utc, sizeof(utc)), typeDescription, statusDescription, max_deferral_time_in_minutes);
+
+	dx_deviceTwinReportState(&dt_DeferredUpdateNotification, msgBuffer);
+}
+/// GENX_END ID:DeferredUpdateNotification
 

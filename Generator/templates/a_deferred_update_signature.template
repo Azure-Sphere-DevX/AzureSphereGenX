@@ -1,2 +1,5 @@
-static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes);
-static void DeferredUpdateNotification_gx_handler(SysEvent_UpdateType type, const char* typeDescription, SysEvent_Status status, const char* statusDescription);
+static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+	SysEvent_Status status, const char* typeDescription, const char* statusDescription);
+
+static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+	SysEvent_Status status, const char* typeDescription, const char* statusDescription);

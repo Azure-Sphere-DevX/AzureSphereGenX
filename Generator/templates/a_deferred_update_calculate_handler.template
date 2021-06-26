@@ -1,34 +1,29 @@
 /// <summary>
-/// Algorithm to determine if a deferred update can proceed
+/// Determine whether or not to defer an update
 /// </summary>
 /// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer</param>
 /// <returns>Return 0 to start update, return greater than zero to defer</returns>
-static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes) {{
-	// make deferral update decision
-	// Examples 
-	// - what is local time - could be as simple as GMT + 8hrs is midnight
-	// - Is it dark
-	// - What is the device doing
-	// - recent activities
-	// - Orientation of the device
+static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+	SysEvent_Status status, const char* typeDescription,
+	const char* statusDescription) {{
 
+	uint32_t requested_minutes = 0;
 	time_t now = time(NULL);
 	struct tm* t = gmtime(&now);
+	char msgBuffer[128];
+	char utc[40];
 
-	// this would work well enough if all devices AU
-	// based on perth time zone GMT + 8 AWST
-	// otherwise use geotime library https://github.com/Azure/azure-sphere-gallery/tree/main/SetTimeFromLocation
-
+	// UTC +10 would work well for devices in Australia
 	t->tm_hour += 10;
 	t->tm_hour = t->tm_hour % 24;
 
-	// do update between 1am and 5am perth time = 12am and 3am sydney time
-	// this gives 3 hour window for update
+	// Set requested_minutes to zero to allow update, greater than zero to defer the update
+	requested_minutes = t->tm_hour >= 1 && t->tm_hour <= 5 ? 0 : 10;
 
-	    // Return zero to allow update, greater than zero to defer the update
-    if (t->tm_hour >= 1 && t->tm_hour <= 5) {{
-        return 0;
-    }} else {{
-        return 15; // defer update for 15 minutes
-	}}
+	snprintf(msgBuffer, sizeof(msgBuffer), "Utc: %s, Type: %s, Status: %s, Max defer minutes: %i, Requested minutes: %i", 
+		dx_getCurrentUtc(utc, sizeof(utc)), typeDescription, statusDescription, max_deferral_time_in_minutes, requested_minutes);
+
+	dx_deviceTwinReportState(&dt_DeferredUpdateRequest, msgBuffer);
+
+	return requested_minutes;
 }}

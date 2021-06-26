@@ -225,7 +225,7 @@
       {
         "name": "DeferredUpdate",
         "description": "Deferred update framework and a device twin to report status",
-        "enabled": false,
+        "enabled": true,
         "include_template": "a_deferred_update_include",
         "signature_template": "a_deferred_update_signature",
         "manifest": [
@@ -246,7 +246,16 @@
             "handler_template": "a_deferred_update_notification_handler"
           },
           {
-            "name": "DeferredUpdateStatus",
+            "name": "DeferredUpdateNotification",
+            "binding_template": "DEVICE_TWIN_BINDING",
+            "variable_template": "declare_device_twin",
+            "properties": {
+              "type": "string",
+              "cloud2device": false
+            }
+          },
+          {
+            "name": "DeferredUpdateRequest",
             "binding_template": "DEVICE_TWIN_BINDING",
             "variable_template": "declare_device_twin",
             "properties": {
