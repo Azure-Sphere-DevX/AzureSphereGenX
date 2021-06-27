@@ -1,0 +1,7 @@
+{
+    "properties": {
+        "pin": "RELAY",
+        "initialState": "GPIO_Value_Low",
+        "invertPin": true
+    }
+}

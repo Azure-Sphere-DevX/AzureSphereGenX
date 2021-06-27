@@ -35,24 +35,38 @@ static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in
 static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
 	SysEvent_Status status, const char* typeDescription, const char* statusDescription);
 
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static void ReportStartState_gx_handler(EventLoopTimer *eventLoopTimer);
+static DX_DIRECT_METHOD_RESPONSE_CODE RestartDevice_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static void Watchdog_gx_handler(EventLoopTimer *eventLoopTimer);
+
 
 static DX_DEVICE_TWIN_BINDING dt_DeferredUpdateNotification = { .twinProperty = "DeferredUpdateNotification", .twinType = DX_TYPE_STRING };
 static DX_DEVICE_TWIN_BINDING dt_DeferredUpdateRequest = { .twinProperty = "DeferredUpdateRequest", .twinType = DX_TYPE_STRING };
+static DX_DIRECT_METHOD_BINDING dm_RestartDevice = { .methodName = "RestartDevice", .handler = RestartDevice_gx_handler };
+static DX_GPIO_BINDING gpio_Light1 = { .pin = RELAY, .name = "Light1", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
+static DX_DIRECT_METHOD_BINDING dm_LightOff = { .methodName = "LightOff", .handler = LightOff_gx_handler };
+static DX_DIRECT_METHOD_BINDING dm_LightOn = { .methodName = "LightOn", .handler = LightOn_gx_handler };
+static DX_TIMER_BINDING tmr_Watchdog = { .period = { 30, 0 }, .name = "Watchdog", .handler = Watchdog_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_DeviceStartUtc = { .twinProperty = "DeviceStartUtc", .twinType = DX_TYPE_STRING };
+static DX_TIMER_BINDING tmr_ReportStartState = { .period = { 0, 0 }, .name = "ReportStartState", .handler = ReportStartState_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_SoftwareVersion = { .twinProperty = "SoftwareVersion", .twinType = DX_TYPE_STRING };
 
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DeferredUpdateNotification, &dt_DeferredUpdateRequest };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DeferredUpdateNotification, &dt_DeferredUpdateRequest, &dt_DeviceStartUtc, &dt_SoftwareVersion };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
+static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = { &dm_RestartDevice, &dm_LightOff, &dm_LightOn };
 
 // All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
-static DX_GPIO_BINDING *gpio_bindings[] = {  };
+static DX_GPIO_BINDING *gpio_bindings[] = { &gpio_Light1 };
 
 // All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = {  };
+static DX_TIMER_BINDING *timer_bindings[] = { &tmr_Watchdog, &tmr_ReportStartState };
 
 
 /****************************************************************************************

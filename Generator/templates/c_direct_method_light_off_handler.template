@@ -1,9 +1,0 @@
-/// <summary>
-/// Direct method to turn off light/relay
-/// </summary>
-static DX_DIRECT_METHOD_RESPONSE_CODE {name}_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {{
-   
-    dx_gpioOff(&gpio_Light1);
-
-    return DX_METHOD_SUCCEEDED;
-}}

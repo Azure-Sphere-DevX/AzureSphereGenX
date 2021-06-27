@@ -1,0 +1,6 @@
+{
+    "properties": {
+        "type": "oneshot",
+        "autostart": true
+    }
+}

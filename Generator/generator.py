@@ -13,8 +13,9 @@ from builders import gpio_in_bindings
 from builders import gpio_out_bindings
 from builders import custom_bindings
 
+
 # declare dictionaries
-signatures = {}
+signatures_block = {}
 timer_block = {}
 variables_block = {}
 handlers_block = {}
@@ -35,9 +36,9 @@ generated_project_path = '../GenX_Generated'
 
 
 def load_bindings():
-    global signatures, timer_block, variables_block, handlers_block, templates, builders, binding_variables, dt, includes_block
+    global signatures_block, timer_block, variables_block, handlers_block, templates, builders, binding_variables, dt, includes_block
 
-    signatures = {}
+    signatures_block = {}
     timer_block = {}
     variables_block = {}
     handlers_block = {}
@@ -49,17 +50,20 @@ def load_bindings():
     with open('app_model.json', 'r') as j:
         data = json.load(j)
 
-    dt = device_twin.Builder(data, signatures=signatures, variables_block=variables_block, handlers_block=handlers_block)
-    dm = direct_methods.Builder(data, signatures=signatures, variables_block=variables_block, handlers_block=handlers_block)
-    timers = timer_bindings.Builder(data, signatures=signatures, variables_block=variables_block, handlers_block=handlers_block, timer_block=timer_block)
-    gpio_input = gpio_in_bindings.Builder(data, signatures=signatures, variables_block=variables_block,
+    dt = device_twin.Builder(data, signatures=signatures_block, variables_block=variables_block, handlers_block=handlers_block)
+    dm = direct_methods.Builder(data, signatures=signatures_block, variables_block=variables_block, handlers_block=handlers_block)
+    timers = timer_bindings.Builder(data, signatures=signatures_block, variables_block=variables_block, handlers_block=handlers_block, timer_block=timer_block)
+    gpio_input = gpio_in_bindings.Builder(data, signatures=signatures_block, variables_block=variables_block,
                                     handlers_block=handlers_block, timer_block=timer_block)
-    gpio_output = gpio_out_bindings.Builder(data, signatures=signatures, variables_block=variables_block,
+    gpio_output = gpio_out_bindings.Builder(data, signatures=signatures_block, variables_block=variables_block,
                                     handlers_block=handlers_block, timer_block=timer_block)
-    general = custom_bindings.Builder(data, signatures=signatures, variables_block=variables_block,
-                            handlers_block=handlers_block, timer_block=timer_block, includes_block=includes_block)
 
-    builders = [dt, dm, timers, gpio_input, gpio_output, general]
+# def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block):
+
+    custom = custom_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
+                            handlers_block=handlers_block, includes_block=includes_block)
+
+    builders = [dt, dm, timers, gpio_input, gpio_output, custom]
 
 
 def get_value(properties, key, default):
@@ -89,8 +93,8 @@ def build_buckets():
 
 
 def render_signatures(f):
-    for item in sorted(signatures):
-        sig = signatures.get(item)
+    for item in sorted(signatures_block):
+        sig = signatures_block.get(item)
         name = sig.get('name')
         template_key = sig.get('signature_template')
         f.write(templates[template_key].format(name=name))
@@ -143,13 +147,15 @@ def render_variable_block(f):
         twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
 
         detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
+        period = get_value(properties, 'period', '{ 0, 0 }')
 
         f.write(templates[template_key].format(
             name=name, pin=pin,
             initialState=initialState,
             invert=invert,
             detect=detect,
-            twin_type=twin_type
+            twin_type=twin_type,
+            period=period
         ))
 
 def does_handler_exist(code_lines, handler):
@@ -273,9 +279,9 @@ def process_update():
     load_main()
     write_main()
 
-# process_update()
+process_update()
 
-watch_file = 'app_model.json'
+# watch_file = 'app_model.json'
 
-watcher = watcher.Watcher(watch_file, process_update)  # also call custom action function
-watcher.watch()  # start the watch going
+# watcher = watcher.Watcher(watch_file, process_update)  # also call custom action function
+# watcher.watch()  # start the watch going

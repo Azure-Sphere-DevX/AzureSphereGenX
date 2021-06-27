@@ -93,7 +93,7 @@
         "properties": {
           "period": "5, 0",
           "type": "oneshot",
-          "start": true
+          "autostart": true
         }
       }
     ],
@@ -131,6 +131,11 @@
     ],
     "custom": [
       {
+        "name": "DeferredUpdate",
+        "description": "Deferred update framework and a device twin to report status",
+        "enabled": true
+      },
+      {
         "name": "PublishTelemetry",
         "enabled": false,
         "properties": {
@@ -142,128 +147,22 @@
       },
       {
         "name": "RestartDevice",
-        "enabled": false,
-        "binding_template": "DIRECT_METHOD_BINDING",
-        "signature_template": "sig_direct_method",
-        "variable_template": "declare_direct_method",
-        "handler_template": "c_restart_device_handler",
-        "include_template": "c_restart_device_include"
+        "enabled": true
       },
       {
         "name": "DirectMethodLightControl",
         "description": "Direct methods to turn light/relay on and off create a light/relay gpio binding",
-        "enabled": false,
-        "components": [
-          {
-            "name": "LightOn",
-            "binding_template": "DIRECT_METHOD_BINDING",
-            "signature_template": "sig_direct_method",
-            "variable_template": "declare_direct_method",
-            "handler_template": "c_direct_method_light_on_handler"
-          },
-          {
-            "name": "LightOff",
-            "binding_template": "DIRECT_METHOD_BINDING",
-            "signature_template": "sig_direct_method",
-            "variable_template": "declare_direct_method",
-            "handler_template": "c_direct_method_light_off_handler"
-          },
-          {
-            "name": "Light1",
-            "binding_template": "GPIO_BINDING",
-            "variable_template": "declare_gpio_output",
-            "properties": {
-              "pin": "RELAY",
-              "initialState": "GPIO_Value_Low",
-              "invertPin": true
-            }
-          }
-        ]
+        "enabled": true
       },
       {
         "name": "Watchdog",
         "description": "Watchdog on a 30 second refresh cadence",
-        "enabled": false,
-        "properties": {
-          "period": "30, 0"
-        },
-        "binding_template": "TIMER_BINDING",
-        "signature_template": "sig_timer",
-        "handler_template": "c_watchdog_handler",
-        "include_template": "c_watchdog_include"
+        "enabled": true
       },
       {
         "name": "ReportStartupState",
         "description": "Report start utc time and software version",
-        "enabled": false,
-        "components": [
-          {
-            "name": "DeviceStartup",
-            "binding_template": "TIMER_BINDING",
-            "signature_template": "sig_timer",
-            "handler_template": "b_device_startup_handler",
-            "variable_template": "declare_timer_oneshot"
-          },
-          {
-            "name": "DeviceStartUtc",
-            "binding_template": "DEVICE_TWIN_BINDING",
-            "variable_template": "declare_device_twin",
-            "properties": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "SoftwareVersion",
-            "binding_template": "DEVICE_TWIN_BINDING",
-            "variable_template": "declare_device_twin",
-            "properties": {
-              "type": "string"
-            }
-          }
-        ]
-      },
-      {
-        "name": "DeferredUpdate",
-        "description": "Deferred update framework and a device twin to report status",
-        "enabled": true,
-        "include_template": "a_deferred_update_include",
-        "signature_template": "a_deferred_update_signature",
-        "manifest": [
-          {
-            "SystemEventNotifications": true
-          },
-          {
-            "SoftwareUpdateDeferral": true
-          }
-        ],
-        "components": [
-          {
-            "name": "DeferredUpdateCalculate",
-            "handler_template": "a_deferred_update_calculate_handler"
-          },
-          {
-            "name": "DeferredUpdateNotification",
-            "handler_template": "a_deferred_update_notification_handler"
-          },
-          {
-            "name": "DeferredUpdateNotification",
-            "binding_template": "DEVICE_TWIN_BINDING",
-            "variable_template": "declare_device_twin",
-            "properties": {
-              "type": "string",
-              "cloud2device": false
-            }
-          },
-          {
-            "name": "DeferredUpdateRequest",
-            "binding_template": "DEVICE_TWIN_BINDING",
-            "variable_template": "declare_device_twin",
-            "properties": {
-              "type": "string",
-              "cloud2device": false
-            }
-          }
-        ]
+        "enabled": true
       }
     ]
   }

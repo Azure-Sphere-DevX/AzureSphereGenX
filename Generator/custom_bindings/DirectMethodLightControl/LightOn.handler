@@ -1,0 +1,9 @@
+/// <summary>
+/// Direct method to turn on light/relay
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {{
+   
+    dx_gpioOn(&gpio_Light1);
+
+    return DX_METHOD_SUCCEEDED;
+}}

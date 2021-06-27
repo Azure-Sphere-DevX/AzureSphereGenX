@@ -94,6 +94,33 @@ int main(int argc, char* argv[]) {{
 // Main code blocks
 
 
+/// GENX_BEGIN ID:ReportStartState MD5:9aa8972320737bc700454c2cfa2a766d
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void ReportStartState_gx_handler(EventLoopTimer *eventLoopTimer) {
+   if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+       dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+       return;
+   }
+
+	char version[60];
+	char utc[30];
+
+	if (dx_isAzureConnected()) {
+
+		dx_deviceTwinReportState(&dt_DeviceStartUtc, dx_getCurrentUtc(utc, sizeof(utc)));
+
+		snprintf(version, sizeof(version), "Application version: %s, DevX version: %s", APPLICATION_VERSION, AZURE_SPHERE_DEVX_VERSION);
+		dx_deviceTwinReportState(&dt_SoftwareVersion, version);
+
+	} else {
+		dx_timerOneShotSet(&tmr_ReportStartState, &(struct timespec) { 5, 0 });
+	}
+}
+/// GENX_END ID:ReportStartState
+
+
 /// GENX_BEGIN ID:DeferredUpdateCalculate MD5:1228ab408e101ae072880291ce561421
 /// <summary>
 /// Determine whether or not to defer an update
@@ -140,4 +167,85 @@ static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_
 	dx_deviceTwinReportState(&dt_DeferredUpdateNotification, msgBuffer);
 }
 /// GENX_END ID:DeferredUpdateNotification
+
+
+/// GENX_BEGIN ID:LightOff MD5:c071f9c3862c47f9bac4372ca00706f7
+/// <summary>
+/// Direct method to turn off light/relay
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+   
+    dx_gpioOff(&gpio_Light1);
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:LightOff
+
+
+/// GENX_BEGIN ID:LightOn MD5:908beb2beb759eb1a91570f6e0866333
+/// <summary>
+/// Direct method to turn on light/relay
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+   
+    dx_gpioOn(&gpio_Light1);
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:LightOn
+
+
+/// GENX_BEGIN ID:RestartDevice MD5:ec6a23190fc9be14a395546953112b46
+/// <summary>
+/// Start Device Power Restart Direct Method 'ResetMethod' integer seconds eg 5
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE RestartDevice_gx_handler(JSON_Value* json, DX_DIRECT_METHOD_BINDING* directMethodBinding, char** responseMsg)
+{
+    if (json_value_get_type(json) != JSONNumber) { return DX_METHOD_FAILED; }
+
+    int seconds = (int)json_value_get_number(json);
+
+    if (seconds > 2 && seconds < 10)
+    {
+        PowerManagement_ForceSystemReboot();        
+        return DX_METHOD_SUCCEEDED;
+    }
+    else
+    {
+        return DX_METHOD_FAILED;
+    }
+}
+/// GENX_END ID:RestartDevice
+
+
+/// GENX_BEGIN ID:Watchdog MD5:4f6bc7d013dfa4e93826c0b945f7a4a1
+/// <summary>
+/// This timer extends the app level lease watchdog timer
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void Watchdog_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+    timer_settime(watchdogTimer, 0, &watchdogInterval, NULL);
+}
+
+/// <summary>
+/// Set up watchdog timer - the lease is extended via the Watchdog_handler function
+/// </summary>
+/// <param name=""></param>
+void StartWatchdog(void) {
+	struct sigevent alarmEvent;
+	alarmEvent.sigev_notify = SIGEV_SIGNAL;
+	alarmEvent.sigev_signo = SIGALRM;
+	alarmEvent.sigev_value.sival_ptr = &watchdogTimer;
+
+	if (timer_create(CLOCK_MONOTONIC, &alarmEvent, &watchdogTimer) == 0) {
+		if (timer_settime(watchdogTimer, 0, &watchdogInterval, NULL) == -1) {
+			Log_Debug("Issue setting watchdog timer. %s %d\n", strerror(errno), errno);
+		}
+	}
+}
+/// GENX_END ID:Watchdog
 
