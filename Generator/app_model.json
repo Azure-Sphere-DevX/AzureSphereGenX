@@ -36,27 +36,6 @@
         "properties": {
           "type": "float"
         }
-      },
-      {
-        "name": "DeferredUpdateStatus",
-        "enabled": false,
-        "properties": {
-          "type": "string"
-        }
-      },
-      {
-        "name": "DeviceStartUtc",
-        "enabled": false,
-        "properties": {
-          "type": "string"
-        }
-      },
-      {
-        "name": "SoftwareVersion",
-        "enabled": false,
-        "properties": {
-          "type": "string"
-        }
       }
     ],
     "direct_methods": [
@@ -133,7 +112,7 @@
       {
         "name": "DeferredUpdate",
         "description": "Deferred update framework and a device twin to report status",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "PublishTelemetry",
@@ -147,22 +126,22 @@
       },
       {
         "name": "RestartDevice",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "DirectMethodLightControl",
         "description": "Direct methods to turn light/relay on and off create a light/relay gpio binding",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "Watchdog",
         "description": "Watchdog on a 30 second refresh cadence",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "ReportStartupState",
         "description": "Report start utc time and software version",
-        "enabled": true
+        "enabled": false
       }
     ]
   }

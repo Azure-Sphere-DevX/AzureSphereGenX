@@ -24,6 +24,7 @@ templates = {}
 
 device_twins_updates = None
 device_twin_variables = None
+oneshot_timer_variables = None
 
 dt = None
 
@@ -279,9 +280,9 @@ def process_update():
     load_main()
     write_main()
 
-process_update()
+# process_update()
 
-# watch_file = 'app_model.json'
+watch_file = 'app_model.json'
 
-# watcher = watcher.Watcher(watch_file, process_update)  # also call custom action function
-# watcher.watch()  # start the watch going
+watcher = watcher.Watcher(watch_file, process_update)  # also call custom action function
+watcher.watch()  # start the watch going

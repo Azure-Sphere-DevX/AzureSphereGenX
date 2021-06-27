@@ -13,7 +13,8 @@ templates = {}
 class Builder():
     def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block):
 
-        self.bindings = list(elem for elem in data.get('bindings').get('custom') if elem.get('enabled', True) == True)
+        self.bindings = list(elem for elem in data.get('bindings').get(
+            'custom') if elem.get('enabled', True) == True)
 
         self.templates = templates
         self.signatures_block = signatures_block
@@ -30,7 +31,6 @@ class Builder():
         custom_bindings = os.listdir(path)
 
         for key in custom_bindings:
-            print(key)
 
             binding_path = path + "/" + key
             components = os.listdir(binding_path)
@@ -65,17 +65,30 @@ class Builder():
         else:
             properties = {}
 
-        binding.update({'properties': properties.get('properties', {})})
+        properties = properties.get('properties')
+
+        binding.update({'properties': properties})
 
         if '.device_twin' in component:
             binding_type = 'device_twin'
             binding_template = "DEVICE_TWIN_BINDING"
+            if properties is not None:
+                cloud2device = properties.get('cloud2device')
         elif '.direct_method' in component:
             binding_type = 'direct_method'
             binding_template = "DIRECT_METHOD_BINDING"
             binding.update({"signature_template": "sig_direct_method"})
         elif '.timer' in component:
-            binding_type = 'timer_periodic'
+            timer_type = None
+
+            if properties is not None:
+                timer_type = properties.get('type')
+
+            if timer_type is not None and timer_type.lower() == 'oneshot':
+                binding_type = 'timer_oneshot'
+            else:
+                binding_type = 'timer_periodic'
+
             binding_template = "TIMER_BINDING"
             binding.update({"signature_template": "sig_timer"})
         elif '.gpio_output' in component:
@@ -88,9 +101,10 @@ class Builder():
             binding_type = ''
             binding_template = ''
 
-        cloud2device = properties.get('cloud2device')
+        
 
-        binding.update({"variable_template": "declare_{type}".format(type=binding_type)})
+        binding.update(
+            {"variable_template": "declare_{type}".format(type=binding_type)})
         binding.update({"binding": binding_template})
         self.variables_block.update({name: binding})
 
@@ -153,34 +167,18 @@ class Builder():
         for component in component_list:
 
             component_filename = 'custom_bindings/' + component_key + '/' + component
+            component_lower = component.lower()
 
-            if '.binding' in component:
+            if '.binding' in component_lower:
                 self.build_binding(component, component_filename)
-            elif '.include' in component:
+            elif '.include' in component_lower:
                 self.build_include(component, component_filename)
-            elif '.handler' in component:
+            elif '.handler' in component_lower:
                 self.build_handler(component, component_filename)
-            elif '.signature' in component:
+            elif '.signature' in component_lower:
                 self.build_signature(component, component_filename)
 
     def build(self):
         self.load_custom_bindings()
         for binding in self.bindings:
             self.get_custom_binding(binding.get('name'))
-
-
-
-# cb = Builder(templates, signatures_block, timer_block,
-#                      variables_block, handlers_block, includes_block)
-# cb.load_custom_bindings()
-# # cb.list_custom_bindings()
-# cb.list_custom_binding_components()
-# cb.get_custom_binding('DeferredUpdate')
-
-
-# print(signatures_block)
-# print(variables_block)
-# print(includes_block)
-# print(handlers_block)
-
-# print(templates)
