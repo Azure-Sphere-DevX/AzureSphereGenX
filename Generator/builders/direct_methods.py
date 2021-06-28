@@ -8,14 +8,13 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-            binding.update({'binding': 'DIRECT_METHOD_BINDING'})
 
             key = binding.get('name')
 
             binding.update({"signature_template": 'sig_direct_method'})
             self.signatures.update({key: binding})
 
-            binding.update({"variable_template": 'declare_direct_method'})
+            binding.update({"variable_template": [('declare_direct_method', 'DIRECT_METHOD_BINDING')]})
             self.variables_block.update({key: binding})
 
             binding.update({"handler_template": 'handler_direct_method'})

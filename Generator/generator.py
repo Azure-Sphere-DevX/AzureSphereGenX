@@ -103,36 +103,6 @@ def render_signatures(f):
         f.write(templates[template_key].format(name=name))
 
 
-def render_timer_block(f):
-
-    for item in timer_block:
-        var = timer_block.get(item)
-
-        name = var.get('name')
-        properties = var.get('properties')
-
-        binding = 'TIMER_BINDING'
-        var_list = binding_variables.get(binding, [])
-        var_list.append(name)
-        binding_variables.update({binding: var_list})
-
-        if properties is not None:
-            period = get_value(properties, 'period', '{ 0, 0 }')
-            timer_type = 'DX_PERIODIC' if properties.get('type', 'periodic') == 'periodic' else 'DX_ONESHOT'
-            template_key = var.get('timer_template')
-            if template_key is None or templates.get(template_key) is None:
-                print('Key: "{template_key}" not found'.format(
-                    template_key=template_key))
-                continue
-            else:
-                f.write(templates[template_key].format(name=name, period=period, timer_type=timer_type,
-                                                       device_twins_updates=device_twins_updates,
-                                                       device_twin_variables=device_twin_variables))
-
-            if properties.get('type').lower() == 'oneshot' and properties.get('autostart') == True:
-                autostart_oneshot_timer_list.append(name)
-
-
 def render_variable_block(f):
     device_twin_types = {"integer": "DX_TYPE_INT", "float": "DX_TYPE_FLOAT", "double": "DX_TYPE_DOUBLE",
                          "boolean": "DX_TYPE_BOOL",  "string": "DX_TYPE_STRING"}
@@ -144,38 +114,43 @@ def render_variable_block(f):
         name = var.get('name')
 
         properties = var.get('properties')
-        template_key = var.get('variable_template')
+        template_keys = var.get('variable_template')
 
-        var_list = binding_variables.get(binding, [])
-        var_list.append(name)
-        binding_variables.update({binding: var_list})
+        for template_key_tuple in template_keys:
 
-        pin = get_value(properties, 'pin', 'GX_PIN_NOT_DECLARED_IN_GENX_MODEL')
-        initialState = get_value(properties, 'initialState', 'GPIO_Value_Low')
-        invert = "true" if get_value(properties, 'invertPin', True) else "false"
+            template_key = template_key_tuple[0]
+            binding = template_key_tuple[1]
 
-        twin_type = get_value(properties, 'type', None)
-        twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
+            var_list = binding_variables.get(binding, [])
+            var_list.append(name)
+            binding_variables.update({binding: var_list})
 
-        detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
-        period = get_value(properties, 'period', '{ 0, 0 }')
+            pin = get_value(properties, 'pin', 'GX_PIN_NOT_DECLARED_IN_GENX_MODEL')
+            initialState = get_value(properties, 'initialState', 'GPIO_Value_Low')
+            invert = "true" if get_value(properties, 'invertPin', True) else "false"
 
-        if template_key is None or templates.get(template_key) is None:
-            print('Key: "{template_key}" not found'.format(
-                template_key=template_key))
-            continue
-        else:
-            f.write(templates[template_key].format(
-                name=name, pin=pin,
-                initialState=initialState,
-                invert=invert,
-                detect=detect,
-                twin_type=twin_type,
-                period=period
-            ))
+            twin_type = get_value(properties, 'type', None)
+            twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
 
-        if properties.get('type').lower() == 'oneshot' and properties.get('autostart') == True:
-            autostart_oneshot_timer_list.append(name)
+            detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
+            period = get_value(properties, 'period', '{ 0, 0 }')
+
+            if template_key is None or templates.get(template_key) is None:
+                print('Key: "{template_key}" not found'.format(
+                    template_key=template_key))
+                continue
+            else:
+                f.write(templates[template_key].format(
+                    name=name, pin=pin,
+                    initialState=initialState,
+                    invert=invert,
+                    detect=detect,
+                    twin_type=twin_type,
+                    period=period
+                ))
+
+            if properties is not None and properties.get('type', '').lower() == 'oneshot' and properties.get('autostart', False) == True:
+                autostart_oneshot_timer_list.append(name)
 
 
 def does_handler_exist(code_lines, handler):
@@ -291,7 +266,7 @@ def write_main():
 
         df.write("\n")
         write_comment_block(df, 'Binding declarations')
-        render_timer_block(df)
+        # render_timer_block(df)
         render_variable_block(df)
         df.write("\n")
 
@@ -336,7 +311,8 @@ def process_update():
     load_main()
     write_main()
 
-# process_update()
+
+process_update()
 
 
 watch_file = 'app_model.json'

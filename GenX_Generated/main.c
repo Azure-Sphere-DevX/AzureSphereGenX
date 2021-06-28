@@ -96,6 +96,98 @@ int main(int argc, char* argv[]) {{
 
 
 
+
+
+
+
+/// GENX_BEGIN ID:CloudStatusLed MD5:a29ad2e6641e7f3caf2bac107c752e47
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void CloudStatusLed_gx_handler(EventLoopTimer *eventLoopTimer) {
+    static bool gpio_state = true;
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    dx_gpioStateSet(&gpio_CloudStatusLed, gpio_state = !gpio_state);
+}
+/// GENX_END ID:CloudStatusLed
+
+
+/// GENX_BEGIN ID:SetDesiredTemperature MD5:dd683d244ac19109976636cf3a456f04
+/// <summary>
+/// What is the purpose of this device twin handler function?
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void SetDesiredTemperature_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    float device_twin_value = *(float*)deviceTwinBinding->twinState;
+
+    if (device_twin_value > 0.0f && device_twin_value < 100.0f){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+
+        // IMPLEMENT YOUR CODE HERE
+
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+/// GENX_END ID:SetDesiredTemperature
+
+
+/// GENX_BEGIN ID:LightOn MD5:e645fa5b922ca0399f867b4145e03318
+/// <summary>
+/// What is the purpose of this direct method handler function?
+/// </summary>
+// Direct method JSON payload example {"Duration":2}:
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+    char duration_str[] = "Duration";
+    int requested_duration_seconds;
+
+    // Allocate and initialize a response message buffer. 
+    // The calling function is responsible for freeing the memory
+    const size_t responseLen = 100; 
+    *responseMsg = (char*)malloc(responseLen);
+    memset(*responseMsg, 0, responseLen);
+
+    JSON_Object *jsonObject = json_value_get_object(json);
+    if (jsonObject == NULL) {
+        snprintf(*responseMsg, responseLen, "%s call failed. Invalid JSON received type.", directMethodBinding->methodName);
+        return DX_METHOD_FAILED;
+    }
+
+    // check JSON properties sent through are the correct type
+    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {
+        snprintf(*responseMsg, responseLen, "%s call failed. Incorrect JSON type.", directMethodBinding->methodName);
+        return DX_METHOD_FAILED;
+    }
+
+    requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
+    Log_Debug("Duration %d \n", requested_duration_seconds);
+
+    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {
+        snprintf(*responseMsg, responseLen, "%s call failed. Duration seconds (%d) out of range.", directMethodBinding->methodName, requested_duration_seconds);
+        return DX_METHOD_FAILED;
+    }
+
+    // IMPLEMENT YOUR ACTION HERE
+
+    snprintf(*responseMsg, responseLen, "%s called successfully", directMethodBinding->methodName);
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:LightOn
+
+
 /// GENX_BEGIN ID:MeasureCarbonMonoxide MD5:aa20d1a999af8ccbbb2124a5b2f54428
 /// <summary>
 /// Implement your oneshot timer function
@@ -116,11 +208,167 @@ static void MeasureCarbonMonoxide_gx_handler(EventLoopTimer *eventLoopTimer) {
 /// GENX_END ID:MeasureCarbonMonoxide
 
 
-/// GENX_BEGIN ID:ReportStartState MD5:9aa8972320737bc700454c2cfa2a766d
+/// GENX_BEGIN ID:MeasureTemperature MD5:3033c155707e37d17fa606a4083a4cf3
 /// <summary>
 /// Implement your timer function
 /// </summary>
-static void ReportStartState_gx_handler(EventLoopTimer *eventLoopTimer) {
+static void MeasureTemperature_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    Log_Debug("Periodic timer MeasureTemperature_handler called\n");
+
+    // Implement your timer function
+}
+/// GENX_END ID:MeasureTemperature
+
+
+/// GENX_BEGIN ID:ButtonA MD5:f4ad977d757748a39b8bc73a4aec9001
+/// <summary>
+/// Implement your GPIO input timer function
+/// </summary>
+static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer) {
+    static GPIO_Value_Type gpio_ButtonANewState;
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    if (dx_gpioStateGet(&gpio_ButtonA, &gpio_ButtonANewState)) {
+        Log_Debug("gpio_ButtonA: %d\n", gpio_ButtonANewState);
+    }
+}
+/// GENX_END ID:ButtonA
+
+
+/// GENX_BEGIN ID:DeferredUpdateCalculate MD5:1228ab408e101ae072880291ce561421
+/// <summary>
+/// Determine whether or not to defer an update
+/// </summary>
+/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer</param>
+/// <returns>Return 0 to start update, return greater than zero to defer</returns>
+static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+	SysEvent_Status status, const char* typeDescription,
+	const char* statusDescription) {
+
+	uint32_t requested_minutes = 0;
+	time_t now = time(NULL);
+	struct tm* t = gmtime(&now);
+	char msgBuffer[128];
+	char utc[40];
+
+	// UTC +10 would work well for devices in Australia
+	t->tm_hour += 10;
+	t->tm_hour = t->tm_hour % 24;
+
+	// Set requested_minutes to zero to allow update, greater than zero to defer the update
+	requested_minutes = t->tm_hour >= 1 && t->tm_hour <= 5 ? 0 : 10;
+
+	snprintf(msgBuffer, sizeof(msgBuffer), "Utc: %s, Type: %s, Status: %s, Max defer minutes: %i, Requested minutes: %i", 
+		dx_getCurrentUtc(utc, sizeof(utc)), typeDescription, statusDescription, max_deferral_time_in_minutes, requested_minutes);
+
+	dx_deviceTwinReportState(&dt_DeferredUpdateRequest, msgBuffer);
+
+	return requested_minutes;
+}
+/// GENX_END ID:DeferredUpdateCalculate
+
+
+/// GENX_BEGIN ID:DeferredUpdateNotification MD5:548e7399dbcdc65dd44c4c79def80d3f
+static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+	SysEvent_Status status, const char* typeDescription, const char* statusDescription) {
+
+	// do something here like update a device twin before updating
+	char msgBuffer[128];
+	char utc[40];
+
+	snprintf(msgBuffer, sizeof(msgBuffer), "Utc: %s, Type: %s, Status: %s, Max defer minutes: %i", dx_getCurrentUtc(utc, sizeof(utc)), typeDescription, statusDescription, max_deferral_time_in_minutes);
+
+	dx_deviceTwinReportState(&dt_DeferredUpdateNotification, msgBuffer);
+}
+/// GENX_END ID:DeferredUpdateNotification
+
+
+/// GENX_BEGIN ID:RestartDevice MD5:6da7d7242ca8e2443ffb9d682039843a
+/// <summary>
+/// Start Device Power Restart Direct Method 'ResetMethod' integer seconds eg 5
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE RestartDevice_gx_handler(JSON_Value* json, DX_DIRECT_METHOD_BINDING* directMethodBinding, char** responseMsg)
+{
+    if (json_value_get_type(json) != JSONNumber) { return DX_METHOD_FAILED; }
+
+    int seconds = (int)json_value_get_number(json);
+
+    if (seconds > 2 && seconds < 10)
+    {
+        dx_timerOneShotSet(&tmr_RestartDeviceDelay, &(struct timespec){ seconds, 0});  
+        return DX_METHOD_SUCCEEDED;
+    }
+    else
+    {
+        return DX_METHOD_FAILED;
+    }
+}
+/// GENX_END ID:RestartDevice
+
+
+/// GENX_BEGIN ID:RestartDeviceDelay MD5:6e0fd3d85557d899b7607722915541d6
+/// <summary>
+/// Restart the Device
+/// </summary>
+static void RestartDeviceDelay_gx_handler(EventLoopTimer* eventLoopTimer)
+{
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0)
+    {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+    }
+    else {
+        PowerManagement_ForceSystemReboot();
+    }
+}
+/// GENX_END ID:RestartDeviceDelay
+
+
+/// GENX_BEGIN ID:Watchdog MD5:4f6bc7d013dfa4e93826c0b945f7a4a1
+/// <summary>
+/// This timer extends the app level lease watchdog timer
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void Watchdog_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+    timer_settime(watchdogTimer, 0, &watchdogInterval, NULL);
+}
+
+/// <summary>
+/// Set up watchdog timer - the lease is extended via the Watchdog_handler function
+/// </summary>
+/// <param name=""></param>
+void StartWatchdog(void) {
+	struct sigevent alarmEvent;
+	alarmEvent.sigev_notify = SIGEV_SIGNAL;
+	alarmEvent.sigev_signo = SIGALRM;
+	alarmEvent.sigev_value.sival_ptr = &watchdogTimer;
+
+	if (timer_create(CLOCK_MONOTONIC, &alarmEvent, &watchdogTimer) == 0) {
+		if (timer_settime(watchdogTimer, 0, &watchdogInterval, NULL) == -1) {
+			Log_Debug("Issue setting watchdog timer. %s %d\n", strerror(errno), errno);
+		}
+	}
+}
+/// GENX_END ID:Watchdog
+
+
+/// GENX_BEGIN ID:ReportStartup MD5:4706a9cfe6586d876bb49926860b4c9f
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void ReportStartup_gx_handler(EventLoopTimer *eventLoopTimer) {
    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
        return;
@@ -137,8 +385,99 @@ static void ReportStartState_gx_handler(EventLoopTimer *eventLoopTimer) {
 		dx_deviceTwinReportState(&dt_SoftwareVersion, version);
 
 	} else {
-		dx_timerOneShotSet(&tmr_ReportStartState, &(struct timespec) { 5, 0 });
+		dx_timerOneShotSet(&tmr_ReportStartup, &(struct timespec) { 5, 0 });
 	}
 }
-/// GENX_END ID:ReportStartState
+/// GENX_END ID:ReportStartup
+
+
+/// GENX_BEGIN ID:SetDesiredCO2AlertLevel MD5:63044ae5a2f83d7d47abc26f9201f60e
+/// <summary>
+/// What is the purpose of this device twin handler function?
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void SetDesiredCO2AlertLevel_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    double device_twin_value = *(double*)deviceTwinBinding->twinState;
+
+    if (device_twin_value > 0.0 && device_twin_value < 100.0){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+
+        // IMPLEMENT YOUR CODE HERE
+
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+/// GENX_END ID:SetDesiredCO2AlertLevel
+
+
+/// GENX_BEGIN ID:LightOff MD5:2acf1fe5b3ee08becb938255b9c0d6e1
+/// <summary>
+/// What is the purpose of this direct method handler function?
+/// </summary>
+// Direct method JSON payload example {"Duration":2}:
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+    char duration_str[] = "Duration";
+    int requested_duration_seconds;
+
+    // Allocate and initialize a response message buffer. 
+    // The calling function is responsible for freeing the memory
+    const size_t responseLen = 100; 
+    *responseMsg = (char*)malloc(responseLen);
+    memset(*responseMsg, 0, responseLen);
+
+    JSON_Object *jsonObject = json_value_get_object(json);
+    if (jsonObject == NULL) {
+        snprintf(*responseMsg, responseLen, "%s call failed. Invalid JSON received type.", directMethodBinding->methodName);
+        return DX_METHOD_FAILED;
+    }
+
+    // check JSON properties sent through are the correct type
+    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {
+        snprintf(*responseMsg, responseLen, "%s call failed. Incorrect JSON type.", directMethodBinding->methodName);
+        return DX_METHOD_FAILED;
+    }
+
+    requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
+    Log_Debug("Duration %d \n", requested_duration_seconds);
+
+    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {
+        snprintf(*responseMsg, responseLen, "%s call failed. Duration seconds (%d) out of range.", directMethodBinding->methodName, requested_duration_seconds);
+        return DX_METHOD_FAILED;
+    }
+
+    // IMPLEMENT YOUR ACTION HERE
+
+    snprintf(*responseMsg, responseLen, "%s called successfully", directMethodBinding->methodName);
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:LightOff
+
+
+/// GENX_BEGIN ID:ReportStartTime MD5:2abe4a5d9833c9d6bd44df2b44348e20
+/// <summary>
+/// Implement your oneshot timer function
+/// </summary>
+static void ReportStartTime_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    Log_Debug("Oneshot timer ReportStartTime_handler called\n");
+    // Implement your timer function
+
+
+    // reload the oneshot timer
+    dx_timerOneShotSet(&tmr_ReportStartTime, &(struct timespec){5, 0});
+}
+/// GENX_END ID:ReportStartTime
 

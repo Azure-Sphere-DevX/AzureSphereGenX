@@ -12,12 +12,11 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-            binding.update({'binding': 'GPIO_BINDING'})
 
             key = binding.get('name')
             properties = binding.get('properties')     
 
-            binding.update({"variable_template": 'declare_gpio_input'})
+            binding.update({"variable_template": [('declare_timer_periodic' , 'TIMER_BINDING'), ('declare_gpio_input', 'GPIO_BINDING')]})
             self.variables_block.update({key: binding})
 
             if self.get_value(properties, 'period') != "":

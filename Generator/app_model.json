@@ -8,7 +8,6 @@
           "tenant_id": "",
           "id_scope": "",
           "iot_hub_central_endpoints": [
-            ""
           ]
         }
       }
@@ -16,7 +15,7 @@
     "device_twins": [
       {
         "name": "SetDesiredTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "cloud2device": true,
           "type": "float"
@@ -24,7 +23,7 @@
       },
       {
         "name": "SetDesiredCO2AlertLevel",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "cloud2device": true,
           "type": "double"
@@ -32,7 +31,7 @@
       },
       {
         "name": "ReportTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "type": "float"
         }
@@ -41,17 +40,17 @@
     "direct_methods": [
       {
         "name": "LightOn",
-        "enabled": false
+        "enabled": true
       },
       {
         "name": "LightOff",
-        "enabled": false
+        "enabled": true
       }
     ],
     "timers": [
       {
         "name": "MeasureTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "{ 5, 0 }",
           "type": "periodic"
@@ -68,7 +67,7 @@
       },
       {
         "name": "ReportStartTime",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "{ 5, 0 }",
           "type": "oneshot",
@@ -79,7 +78,7 @@
     "gpio_outputs": [
       {
         "name": "CloudStatusLed",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "GPIO_Value_Low",
@@ -89,7 +88,7 @@
       },
       {
         "name": "Relay1",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "RELAY",
           "initialState": "GPIO_Value_Low",
@@ -100,7 +99,7 @@
     "gpio_inputs": [
       {
         "name": "ButtonA",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "BUTTON_A",
           "detect": "DX_GPIO_DETECT_BOTH",
@@ -112,7 +111,7 @@
       {
         "name": "DeferredUpdate",
         "description": "Deferred update framework and a device twin to report status",
-        "enabled": false
+        "enabled": true
       },
       {
         "name": "PublishTelemetry",
@@ -127,7 +126,7 @@
       {
         "name": "RestartDevice",
         "description": "Restart device from a direct method",
-        "enabled": false
+        "enabled": true
       },
       {
         "name": "DirectMethodLightControl",
@@ -137,10 +136,10 @@
       {
         "name": "Watchdog",
         "description": "Watchdog on a 30 second refresh cadence",
-        "enabled": false
+        "enabled": true
       },
       {
-        "name": "ReportStartupState",
+        "name": "ReportStartup",
         "description": "Report start utc time and software version",
         "enabled": true
       }

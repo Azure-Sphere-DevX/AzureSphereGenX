@@ -103,9 +103,8 @@ class Builder():
 
         
 
-        binding.update(
-            {"variable_template": "declare_{type}".format(type=binding_type)})
-        binding.update({"binding": binding_template})
+        binding.update({"variable_template": [("declare_{type}".format(type=binding_type), binding_template)]})
+        # binding.update({"binding": binding_template})
         self.variables_block.update({name: binding})
 
         signature_template = binding.get('signature_template')

@@ -15,7 +15,6 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-            binding.update({'binding': 'DEVICE_TWIN_BINDING'})
             
             key = binding.get('name')
             properties = binding.get('properties')            
@@ -25,14 +24,14 @@ class Builder():
                 binding.update({"signature_template": 'sig_device_twin'})
                 self.signatures.update({key: binding})
 
-                binding.update({"variable_template": 'declare_device_twin_with_handler'})
+                binding.update({"variable_template": [('declare_device_twin_with_handler', 'DEVICE_TWIN_BINDING')]})
                 self.variables_block.update({key: binding})
 
                 binding.update({"handler_template": self.device_twin_template[properties.get('type')]})
                 self.handlers_block.update({key: binding})
 
             else:
-                binding.update({"variable_template": 'declare_device_twin'})
+                binding.update({"variable_template": [('declare_device_twin', 'DEVICE_TWIN_BINDING')]})
                 self.variables_block.update({key: binding})
 
     def build_publish_device_twins(self):

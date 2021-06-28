@@ -9,7 +9,6 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-            binding.update({'binding': 'TIMER_BINDING'})
 
             key = binding.get('name')
             properties = binding.get('properties')     
@@ -27,14 +26,22 @@ class Builder():
 
                 binding.update({'period': period})
 
-                binding.update({"timer_template": 'declare_timer_periodic'})
-                self.timer_block.update({key: binding})
+                # binding.update({"timer_template": 'declare_timer_periodic'})
+                # self.timer_block.update({key: binding})
+
+                
+                binding.update({"variable_template": [('declare_timer_periodic', 'TIMER_BINDING')]})
+                self.variables_block.update({key: binding})
+                
 
                 binding.update({"handler_template": 'handler_timer_periodic'})
                 self.handlers_block.update({key: binding})
             else:
-                binding.update({"timer_template": 'declare_timer_oneshot'})
-                self.timer_block.update({key: binding})
+                # binding.update({"timer_template": 'declare_timer_oneshot'})
+                # self.timer_block.update({key: binding})
+
+                binding.update({"variable_template": [('declare_timer_oneshot', 'TIMER_BINDING')]})
+                self.variables_block.update({key: binding})
 
                 binding.update({"handler_template": 'handler_timer_oneshot'})
                 self.handlers_block.update({key: binding})

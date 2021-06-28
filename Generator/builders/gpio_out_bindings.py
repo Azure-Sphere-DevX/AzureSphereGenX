@@ -12,20 +12,21 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-            binding.update({'binding': 'GPIO_BINDING'})
 
             key = binding.get('name')
             properties = binding.get('properties')
 
-            binding.update({"variable_template": 'declare_gpio_output'})
+            binding.update({"variable_template": [('declare_gpio_output', 'GPIO_BINDING')]})
             self.variables_block.update({key: binding})
 
             if self.get_value(properties, 'period') != "":
                 binding.update({"signature_template": 'sig_timer'})
                 self.signatures.update({key: binding})
 
-                binding.update({"timer_template": 'declare_timer_periodic'})
-                self.timer_block.update({key: binding})
+                # binding.update({"timer_template": 'declare_timer_periodic'})
+                # self.timer_block.update({key: binding})
+                binding.update({"variable_template": [('declare_timer_periodic' , 'TIMER_BINDING'), ('declare_gpio_output', 'GPIO_BINDING')]})
+                self.variables_block.update({key: binding})
 
                 binding.update({"handler_template": 'handler_gpio_output'})
                 self.handlers_block.update({key: binding})
