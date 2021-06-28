@@ -1,0 +1,6 @@
+{
+    "Capabilities": {
+        "SystemEventNotifications": true,
+        "SoftwareUpdateDeferral": true
+    }
+}

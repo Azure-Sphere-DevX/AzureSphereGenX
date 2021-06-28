@@ -94,29 +94,6 @@ int main(int argc, char* argv[]) {{
 // Main code blocks
 
 
-
-
-
-
-
-
-/// GENX_BEGIN ID:CloudStatusLed MD5:a29ad2e6641e7f3caf2bac107c752e47
-/// <summary>
-/// Implement your timer function
-/// </summary>
-static void CloudStatusLed_gx_handler(EventLoopTimer *eventLoopTimer) {
-    static bool gpio_state = true;
-
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }
-
-    dx_gpioStateSet(&gpio_CloudStatusLed, gpio_state = !gpio_state);
-}
-/// GENX_END ID:CloudStatusLed
-
-
 /// GENX_BEGIN ID:SetDesiredTemperature MD5:dd683d244ac19109976636cf3a456f04
 /// <summary>
 /// What is the purpose of this device twin handler function?
@@ -144,48 +121,74 @@ static void SetDesiredTemperature_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinB
 /// GENX_END ID:SetDesiredTemperature
 
 
-/// GENX_BEGIN ID:LightOn MD5:e645fa5b922ca0399f867b4145e03318
+/// GENX_BEGIN ID:SetDesiredCO2AlertLevel MD5:63044ae5a2f83d7d47abc26f9201f60e
 /// <summary>
-/// What is the purpose of this direct method handler function?
+/// What is the purpose of this device twin handler function?
 /// </summary>
-// Direct method JSON payload example {"Duration":2}:
+/// <param name="deviceTwinBinding"></param>
+static void SetDesiredCO2AlertLevel_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    double device_twin_value = *(double*)deviceTwinBinding->twinState;
+
+    if (device_twin_value > 0.0 && device_twin_value < 100.0){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+
+        // IMPLEMENT YOUR CODE HERE
+
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+/// GENX_END ID:SetDesiredCO2AlertLevel
+
+
+/// GENX_BEGIN ID:LightOn MD5:ba808c29e6a607a6e2f661045849f658
+/// <summary>
+/// Direct method to turn on light/relay
+/// </summary>
 static DX_DIRECT_METHOD_RESPONSE_CODE LightOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
-    char duration_str[] = "Duration";
-    int requested_duration_seconds;
-
-    // Allocate and initialize a response message buffer. 
-    // The calling function is responsible for freeing the memory
-    const size_t responseLen = 100; 
-    *responseMsg = (char*)malloc(responseLen);
-    memset(*responseMsg, 0, responseLen);
-
-    JSON_Object *jsonObject = json_value_get_object(json);
-    if (jsonObject == NULL) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Invalid JSON received type.", directMethodBinding->methodName);
-        return DX_METHOD_FAILED;
-    }
-
-    // check JSON properties sent through are the correct type
-    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Incorrect JSON type.", directMethodBinding->methodName);
-        return DX_METHOD_FAILED;
-    }
-
-    requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
-    Log_Debug("Duration %d \n", requested_duration_seconds);
-
-    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Duration seconds (%d) out of range.", directMethodBinding->methodName, requested_duration_seconds);
-        return DX_METHOD_FAILED;
-    }
-
-    // IMPLEMENT YOUR ACTION HERE
-
-    snprintf(*responseMsg, responseLen, "%s called successfully", directMethodBinding->methodName);
+   
+    dx_gpioOn(&gpio_Relay1);
 
     return DX_METHOD_SUCCEEDED;
 }
 /// GENX_END ID:LightOn
+
+
+/// GENX_BEGIN ID:LightOff MD5:1cb01231b4eaf2112d1b93aca941f24e
+/// <summary>
+/// Direct method to turn off light/relay
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+   
+    dx_gpioOff(&gpio_Relay1);
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:LightOff
+
+
+/// GENX_BEGIN ID:MeasureTemperature MD5:3033c155707e37d17fa606a4083a4cf3
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void MeasureTemperature_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    Log_Debug("Periodic timer MeasureTemperature_handler called\n");
+
+    // Implement your timer function
+}
+/// GENX_END ID:MeasureTemperature
 
 
 /// GENX_BEGIN ID:MeasureCarbonMonoxide MD5:aa20d1a999af8ccbbb2124a5b2f54428
@@ -208,21 +211,24 @@ static void MeasureCarbonMonoxide_gx_handler(EventLoopTimer *eventLoopTimer) {
 /// GENX_END ID:MeasureCarbonMonoxide
 
 
-/// GENX_BEGIN ID:MeasureTemperature MD5:3033c155707e37d17fa606a4083a4cf3
+/// GENX_BEGIN ID:ReportStartTime MD5:2abe4a5d9833c9d6bd44df2b44348e20
 /// <summary>
-/// Implement your timer function
+/// Implement your oneshot timer function
 /// </summary>
-static void MeasureTemperature_gx_handler(EventLoopTimer *eventLoopTimer) {
+static void ReportStartTime_gx_handler(EventLoopTimer *eventLoopTimer) {
     if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
     }
 
-    Log_Debug("Periodic timer MeasureTemperature_handler called\n");
-
+    Log_Debug("Oneshot timer ReportStartTime_handler called\n");
     // Implement your timer function
+
+
+    // reload the oneshot timer
+    dx_timerOneShotSet(&tmr_ReportStartTime, &(struct timespec){5, 0});
 }
-/// GENX_END ID:MeasureTemperature
+/// GENX_END ID:ReportStartTime
 
 
 /// GENX_BEGIN ID:ButtonA MD5:f4ad977d757748a39b8bc73a4aec9001
@@ -242,6 +248,23 @@ static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer) {
     }
 }
 /// GENX_END ID:ButtonA
+
+
+/// GENX_BEGIN ID:CloudStatusLed MD5:a29ad2e6641e7f3caf2bac107c752e47
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void CloudStatusLed_gx_handler(EventLoopTimer *eventLoopTimer) {
+    static bool gpio_state = true;
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    dx_gpioStateSet(&gpio_CloudStatusLed, gpio_state = !gpio_state);
+}
+/// GENX_END ID:CloudStatusLed
 
 
 /// GENX_BEGIN ID:DeferredUpdateCalculate MD5:1228ab408e101ae072880291ce561421
@@ -290,6 +313,46 @@ static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_
 	dx_deviceTwinReportState(&dt_DeferredUpdateNotification, msgBuffer);
 }
 /// GENX_END ID:DeferredUpdateNotification
+
+
+/// GENX_BEGIN ID:PublishTelemetry MD5:434103d1ffb397152b9ff44f5d6200ab
+/// <summary>
+/// Publish environment sensor telemetry to IoT Hub/Central
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void PublishTelemetry_gx_handler(EventLoopTimer *eventLoopTimer) {
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    float temperature = 30.0f;
+    float humidity = 60.0f;
+    float pressure = 1010.0f;
+
+
+    if (dx_isAzureConnected()) {
+
+        // Serialize telemetry as JSON
+        bool serialization_result = dx_jsonSerialize(gx_PublishTelemetryBuffer, sizeof(gx_PublishTelemetryBuffer), 3, 
+            DX_JSON_DOUBLE, "Temperature", temperature, 
+            DX_JSON_DOUBLE, "Humidity", humidity,
+            DX_JSON_DOUBLE, "Pressure", pressure);
+
+        if (serialization_result) {
+            Log_Debug("%s\n", gx_PublishTelemetryBuffer);
+            
+            dx_azurePublish(gx_PublishTelemetryBuffer, strlen(gx_PublishTelemetryBuffer), gx_PublishTelemetryMessageProperties, 
+                            NELEMS(gx_PublishTelemetryMessageProperties), &gx_PublishTelemetryContentProperties);
+        
+        } else {
+            Log_Debug("gx_PublishTelemetryBuffer to small to serialize JSON\n");
+        }
+
+    }
+}
+/// GENX_END ID:PublishTelemetry
 
 
 /// GENX_BEGIN ID:RestartDevice MD5:6da7d7242ca8e2443ffb9d682039843a
@@ -389,95 +452,4 @@ static void ReportStartup_gx_handler(EventLoopTimer *eventLoopTimer) {
 	}
 }
 /// GENX_END ID:ReportStartup
-
-
-/// GENX_BEGIN ID:SetDesiredCO2AlertLevel MD5:63044ae5a2f83d7d47abc26f9201f60e
-/// <summary>
-/// What is the purpose of this device twin handler function?
-/// </summary>
-/// <param name="deviceTwinBinding"></param>
-static void SetDesiredCO2AlertLevel_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
-
-    // Checking the twinStateUpdated here will always be true.
-    // But it's useful property for other areas of your code.
-    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
-
-    double device_twin_value = *(double*)deviceTwinBinding->twinState;
-
-    if (device_twin_value > 0.0 && device_twin_value < 100.0){
-        Log_Debug("Device twin value: %f\n", device_twin_value);
-
-        // IMPLEMENT YOUR CODE HERE
-
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
-    }
-}
-/// GENX_END ID:SetDesiredCO2AlertLevel
-
-
-/// GENX_BEGIN ID:LightOff MD5:2acf1fe5b3ee08becb938255b9c0d6e1
-/// <summary>
-/// What is the purpose of this direct method handler function?
-/// </summary>
-// Direct method JSON payload example {"Duration":2}:
-static DX_DIRECT_METHOD_RESPONSE_CODE LightOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
-    char duration_str[] = "Duration";
-    int requested_duration_seconds;
-
-    // Allocate and initialize a response message buffer. 
-    // The calling function is responsible for freeing the memory
-    const size_t responseLen = 100; 
-    *responseMsg = (char*)malloc(responseLen);
-    memset(*responseMsg, 0, responseLen);
-
-    JSON_Object *jsonObject = json_value_get_object(json);
-    if (jsonObject == NULL) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Invalid JSON received type.", directMethodBinding->methodName);
-        return DX_METHOD_FAILED;
-    }
-
-    // check JSON properties sent through are the correct type
-    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Incorrect JSON type.", directMethodBinding->methodName);
-        return DX_METHOD_FAILED;
-    }
-
-    requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
-    Log_Debug("Duration %d \n", requested_duration_seconds);
-
-    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {
-        snprintf(*responseMsg, responseLen, "%s call failed. Duration seconds (%d) out of range.", directMethodBinding->methodName, requested_duration_seconds);
-        return DX_METHOD_FAILED;
-    }
-
-    // IMPLEMENT YOUR ACTION HERE
-
-    snprintf(*responseMsg, responseLen, "%s called successfully", directMethodBinding->methodName);
-
-    return DX_METHOD_SUCCEEDED;
-}
-/// GENX_END ID:LightOff
-
-
-/// GENX_BEGIN ID:ReportStartTime MD5:2abe4a5d9833c9d6bd44df2b44348e20
-/// <summary>
-/// Implement your oneshot timer function
-/// </summary>
-static void ReportStartTime_gx_handler(EventLoopTimer *eventLoopTimer) {
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }
-
-    Log_Debug("Oneshot timer ReportStartTime_handler called\n");
-    // Implement your timer function
-
-
-    // reload the oneshot timer
-    dx_timerOneShotSet(&tmr_ReportStartTime, &(struct timespec){5, 0});
-}
-/// GENX_END ID:ReportStartTime
 

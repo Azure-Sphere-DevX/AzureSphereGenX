@@ -3,7 +3,7 @@
     "cloud_config": [
       {
         "name": "glovebox-demo",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "tenant_id": "",
           "id_scope": "",
@@ -102,7 +102,7 @@
         "enabled": true,
         "properties": {
           "pin": "BUTTON_A",
-          "detect": "DX_GPIO_DETECT_BOTH",
+          "detect": "DX_GPIO_DETECT_LOW",
           "period": "{ 0, 200000000 }"
         }
       }
@@ -114,14 +114,9 @@
         "enabled": true
       },
       {
-        "name": "PublishTelemetry",
-        "enabled": false,
-        "properties": {
-          "period": "{ 15,0 }"
-        },
-        "signature_template": "sig_timer",
-        "handler_template": "c_publish_telemetry_handler",
-        "include_template": "c_publish_telemetry_include"
+        "name": "PublishTelemetryAzureIoT",
+        "description": "Publish telemetry to Azure IoT",
+        "enabled": true
       },
       {
         "name": "RestartDevice",
@@ -131,7 +126,7 @@
       {
         "name": "DirectMethodLightControl",
         "description": "Turn light/relay on and off from a direct method",
-        "enabled": false
+        "enabled": true
       },
       {
         "name": "Watchdog",

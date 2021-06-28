@@ -96,7 +96,7 @@ def build_buckets():
 
 
 def render_signatures(f):
-    for item in signatures_block:
+    for item in sorted(signatures_block):
         sig = signatures_block.get(item)
         name = sig.get('name')
         template_key = sig.get('signature_template')
