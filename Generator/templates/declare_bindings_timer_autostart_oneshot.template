@@ -1,0 +1,3 @@
+
+// All timers referenced in timer_bindings_oneshot will be started in the gx_initPeripheralAndHandlers function
+static DX_TIMER_BINDING *timer_bindings_oneshot[] = {{ {autostart_timer_list} }};

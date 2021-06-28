@@ -1,4 +1,4 @@
 
-// All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
+// All timers referenced in timer_bindings will be opened in the gx_initPeripheralAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
 static DX_TIMER_BINDING *timer_bindings[] = {{ {variables} }};

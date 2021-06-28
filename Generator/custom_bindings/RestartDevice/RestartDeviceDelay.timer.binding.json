@@ -1,5 +1,5 @@
 {
     "properties": {
-      "type": "string"
+        "type": "oneshot"
     }
-  }
+}

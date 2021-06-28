@@ -25,7 +25,6 @@ class Builder():
                 self.signatures.update({key: binding})
 
                 binding.update({"timer_template": 'declare_timer_periodic'})
-                properties.update({"period": "{" + self.get_value(properties, 'period') + "}"})
                 self.timer_block.update({key: binding})
 
                 binding.update({"handler_template": 'handler_gpio_input'})

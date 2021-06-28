@@ -1,0 +1,13 @@
+/// <summary>
+/// Restart the Device
+/// </summary>
+static void {name}_gx_handler(EventLoopTimer* eventLoopTimer)
+{{
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0)
+    {{
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+    }}
+    else {{
+        PowerManagement_ForceSystemReboot();
+    }}
+}}

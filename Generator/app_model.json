@@ -15,7 +15,7 @@
     ],
     "device_twins": [
       {
-        "name": "DesiredTemperature",
+        "name": "SetDesiredTemperature",
         "enabled": false,
         "properties": {
           "cloud2device": true,
@@ -23,7 +23,7 @@
         }
       },
       {
-        "name": "DesiredCO2AlertLevel",
+        "name": "SetDesiredCO2AlertLevel",
         "enabled": false,
         "properties": {
           "cloud2device": true,
@@ -31,7 +31,7 @@
         }
       },
       {
-        "name": "ReportedTemperature",
+        "name": "ReportTemperature",
         "enabled": false,
         "properties": {
           "type": "float"
@@ -53,24 +53,24 @@
         "name": "MeasureTemperature",
         "enabled": false,
         "properties": {
-          "period": "5, 0",
+          "period": "{ 5, 0 }",
           "type": "periodic"
         }
       },
       {
         "name": "MeasureCarbonMonoxide",
-        "enabled": false,
+        "enabled": true,
         "properties": {
-          "period": "5, 0",
-          "type": "oneshot",
-          "autostart": true
+          "type": "oneshot",                 
+          "autostart": true,
+          "period": "{ 5, 0 }"
         }
       },
       {
         "name": "ReportStartTime",
         "enabled": false,
         "properties": {
-          "period": "5, 0",
+          "period": "{ 5, 0 }",
           "type": "oneshot",
           "autostart": true
         }
@@ -84,7 +84,7 @@
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "GPIO_Value_Low",
           "invertPin": true,
-          "period": "5, 0"
+          "period": "{ 5, 0 }"
         }
       },
       {
@@ -104,7 +104,7 @@
         "properties": {
           "pin": "BUTTON_A",
           "detect": "DX_GPIO_DETECT_BOTH",
-          "period": "0, 200000000"
+          "period": "{ 0, 200000000 }"
         }
       }
     ],
@@ -118,7 +118,7 @@
         "name": "PublishTelemetry",
         "enabled": false,
         "properties": {
-          "period": "15,0"
+          "period": "{ 15,0 }"
         },
         "signature_template": "sig_timer",
         "handler_template": "c_publish_telemetry_handler",
@@ -126,11 +126,12 @@
       },
       {
         "name": "RestartDevice",
+        "description": "Restart device from a direct method",
         "enabled": false
       },
       {
         "name": "DirectMethodLightControl",
-        "description": "Direct methods to turn light/relay on and off create a light/relay gpio binding",
+        "description": "Turn light/relay on and off from a direct method",
         "enabled": false
       },
       {
@@ -141,7 +142,7 @@
       {
         "name": "ReportStartupState",
         "description": "Report start utc time and software version",
-        "enabled": false
+        "enabled": true
       }
     ]
   }

@@ -17,10 +17,16 @@ class Builder():
             binding.update({"signature_template": 'sig_timer'})
             self.signatures.update({key: binding})
             properties = binding['properties']
-            
+
+            timer_type = properties.get('type')
             period = properties.get('period')
-            if period is not None:
-                properties.update({'period': '{ ' + period + ' }'})
+
+            if timer_type is None or timer_type.lower() == 'periodic':
+                # If period missing then set period to every 10 seconds
+                period = period if period is not None else '{ 10, 0 }'
+
+                binding.update({'period': period})
+
                 binding.update({"timer_template": 'declare_timer_periodic'})
                 self.timer_block.update({key: binding})
 

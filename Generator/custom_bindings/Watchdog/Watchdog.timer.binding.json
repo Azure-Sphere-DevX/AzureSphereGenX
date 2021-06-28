@@ -1,5 +1,6 @@
 {
     "properties": {
-        "period": "{ 30, 0 }"
+        "period": "{ 30, 0 }",
+        "type": "periodic"
     }
 }

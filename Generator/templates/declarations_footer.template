@@ -30,6 +30,13 @@ static void gx_initPeripheralAndHandlers(void)
     if (NELEMS(timer_bindings) > 0) {
         dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));
     }
+    
+    if (NELEMS(timer_bindings_oneshot) > 0) {
+        for (int i = 0; i < NELEMS(timer_bindings_oneshot); i++) {
+            // defaults to starting all oneshot timers after 1 second
+            dx_timerOneShotSet(timer_bindings_oneshot[i], &(struct timespec){ 1, 0 });
+        }
+    }
 
 #ifdef GX_DEFERRED_UPDATE
    	dx_deferredUpdateRegistration(DeferredUpdateCalculate_gx_handler, DeferredUpdateNotification_gx_handler);

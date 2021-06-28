@@ -93,3 +93,52 @@ int main(int argc, char* argv[]) {{
 
 // Main code blocks
 
+
+
+
+/// GENX_BEGIN ID:MeasureCarbonMonoxide MD5:aa20d1a999af8ccbbb2124a5b2f54428
+/// <summary>
+/// Implement your oneshot timer function
+/// </summary>
+static void MeasureCarbonMonoxide_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    Log_Debug("Oneshot timer MeasureCarbonMonoxide_handler called\n");
+    // Implement your timer function
+
+
+    // reload the oneshot timer
+    dx_timerOneShotSet(&tmr_MeasureCarbonMonoxide, &(struct timespec){5, 0});
+}
+/// GENX_END ID:MeasureCarbonMonoxide
+
+
+/// GENX_BEGIN ID:ReportStartState MD5:9aa8972320737bc700454c2cfa2a766d
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void ReportStartState_gx_handler(EventLoopTimer *eventLoopTimer) {
+   if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+       dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+       return;
+   }
+
+	char version[60];
+	char utc[30];
+
+	if (dx_isAzureConnected()) {
+
+		dx_deviceTwinReportState(&dt_DeviceStartUtc, dx_getCurrentUtc(utc, sizeof(utc)));
+
+		snprintf(version, sizeof(version), "Application version: %s, DevX version: %s", APPLICATION_VERSION, AZURE_SPHERE_DEVX_VERSION);
+		dx_deviceTwinReportState(&dt_SoftwareVersion, version);
+
+	} else {
+		dx_timerOneShotSet(&tmr_ReportStartState, &(struct timespec) { 5, 0 });
+	}
+}
+/// GENX_END ID:ReportStartState
+

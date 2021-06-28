@@ -1,6 +1,5 @@
 {
   "properties": {
-    "type": "string",
-    "cloud2device": false
+    "type": "string"
   }
 }

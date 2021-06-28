@@ -9,7 +9,7 @@ static DX_DIRECT_METHOD_RESPONSE_CODE {name}_gx_handler(JSON_Value* json, DX_DIR
 
     if (seconds > 2 && seconds < 10)
     {{
-        PowerManagement_ForceSystemReboot();        
+        dx_timerOneShotSet(&tmr_RestartDeviceDelay, &(struct timespec){{ seconds, 0}});  
         return DX_METHOD_SUCCEEDED;
     }}
     else
