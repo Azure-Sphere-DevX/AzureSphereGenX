@@ -111,6 +111,7 @@
       {
         "name": "DeferredUpdate",
         "description": "Deferred update framework and a device twin to report status",
+        "warning": "The app_manifest.json file is updated with the following capabilities: SystemEventNotifications and SoftwareUpdateDeferral",
         "enabled": false
       },
       {
@@ -121,6 +122,7 @@
       {
         "name": "RestartDevice",
         "description": "Restart device from a direct method",
+        "warning": "The app_manifest.json file is updated with the following capabilities:  PowerControls, ForceReboot",
         "enabled": false
       },
       {
