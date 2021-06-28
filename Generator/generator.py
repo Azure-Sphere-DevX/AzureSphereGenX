@@ -22,6 +22,8 @@ handlers_block = {}
 includes_block = {}
 templates = {}
 
+
+manifest_updates = { }
 device_twins_updates = None
 device_twin_variables = None
 autostart_oneshot_timer_list = []
@@ -37,7 +39,7 @@ generated_project_path = '../GenX_Generated'
 
 
 def load_bindings():
-    global signatures_block, timer_block, variables_block, handlers_block, templates, builders, binding_variables, dt, includes_block
+    global signatures_block, timer_block, variables_block, handlers_block, templates, builders, binding_variables, dt, includes_block, manifest_updates
 
     signatures_block = {}
     timer_block = {}
@@ -46,6 +48,7 @@ def load_bindings():
     includes_block = {}
     templates = {}
     binding_variables = {}
+    manifest_updates = { }
 
     time.sleep(0.5)
     with open('app_model.json', 'r') as j:
@@ -65,7 +68,7 @@ def load_bindings():
 # def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block):
 
     custom = custom_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
-                                     handlers_block=handlers_block, includes_block=includes_block)
+                                     handlers_block=handlers_block, includes_block=includes_block, manifest_updates=manifest_updates)
 
     builders = [dt, dm, timers, gpio_input, gpio_output, custom]
 
@@ -91,8 +94,10 @@ def load_templates():
 
 
 def build_buckets():
+    global manifest_updates
     for builder in builders:
-        builder.build()
+        # this is a hack - only the last builder - custom returns a manifest object
+        manifest_updates = builder.build()
 
 
 def render_signatures(f):
@@ -282,6 +287,44 @@ def write_main():
         with open(generated_project_path + "/main.c", "w") as mf:
             mf.writelines(code_lines)
 
+def update_manifest():
+    with open(generated_project_path + "/app_manifest.json", "r") as f:
+        manifest = json.load(f)
+
+
+    for root_object in manifest_updates:
+        items = manifest_updates.get(root_object)
+        
+        for key in items:
+            value_type = type(key)
+            if value_type == bool or value_type == str:
+                value = items.get(key)
+                manifest[root_object][key] = value
+                continue
+            
+            if value_type == dict:
+                for item in key:
+
+                    value = key.get(item)
+                    value_type = type(value)
+
+                    if value_type == bool or value_type == str:
+                        manifest[root_object][item] = value
+                        continue
+
+                    if value_type == list:
+                        existing = manifest.get(root_object).get(item)
+                        if existing is not None:
+                            for item in value:
+                                if item not in existing:
+                                    manifest[root_object][item] = value
+                        else:
+                            manifest[root_object][item] = value
+
+
+    with open(generated_project_path + "/app_manifest.json", "w") as f:
+        json.dump(manifest, f, indent=2)
+
 
 def load_main():
     global code_lines
@@ -310,6 +353,7 @@ def process_update():
     build_buckets()
     load_main()
     write_main()
+    update_manifest()
 
 
 process_update()

@@ -3,7 +3,7 @@
     "cloud_config": [
       {
         "name": "glovebox-demo",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "tenant_id": "",
           "id_scope": "",
@@ -15,7 +15,7 @@
     "device_twins": [
       {
         "name": "SetDesiredTemperature",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "cloud2device": true,
           "type": "float"
@@ -23,7 +23,7 @@
       },
       {
         "name": "SetDesiredCO2AlertLevel",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "cloud2device": true,
           "type": "double"
@@ -31,7 +31,7 @@
       },
       {
         "name": "ReportTemperature",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "type": "float"
         }
@@ -40,17 +40,17 @@
     "direct_methods": [
       {
         "name": "LightOn",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "LightOff",
-        "enabled": true
+        "enabled": false
       }
     ],
     "timers": [
       {
         "name": "MeasureTemperature",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "period": "{ 5, 0 }",
           "type": "periodic"
@@ -58,7 +58,7 @@
       },
       {
         "name": "MeasureCarbonMonoxide",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "type": "oneshot",                 
           "autostart": true,
@@ -67,7 +67,7 @@
       },
       {
         "name": "ReportStartTime",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "period": "{ 5, 0 }",
           "type": "oneshot",
@@ -78,7 +78,7 @@
     "gpio_outputs": [
       {
         "name": "CloudStatusLed",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "GPIO_Value_Low",
@@ -88,7 +88,7 @@
       },
       {
         "name": "Relay1",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "pin": "RELAY",
           "initialState": "GPIO_Value_Low",
@@ -99,7 +99,7 @@
     "gpio_inputs": [
       {
         "name": "ButtonA",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "pin": "BUTTON_A",
           "detect": "DX_GPIO_DETECT_LOW",
@@ -111,32 +111,32 @@
       {
         "name": "DeferredUpdate",
         "description": "Deferred update framework and a device twin to report status",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "PublishTelemetryAzureIoT",
         "description": "Publish telemetry to Azure IoT",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "RestartDevice",
         "description": "Restart device from a direct method",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "DirectMethodLightControl",
         "description": "Turn light/relay on and off from a direct method",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "Watchdog",
         "description": "Watchdog on a 30 second refresh cadence",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "ReportStartup",
         "description": "Report start utc time and software version",
-        "enabled": true
+        "enabled": false
       }
     ]
   }

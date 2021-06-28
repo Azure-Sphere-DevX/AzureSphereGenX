@@ -11,7 +11,7 @@ templates = {}
 
 
 class Builder():
-    def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block):
+    def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block, manifest_updates):
 
         self.bindings = list(elem for elem in data.get('bindings').get(
             'custom') if elem.get('enabled', True) == True)
@@ -23,7 +23,18 @@ class Builder():
         self.handlers_block = handlers_block
         self.includes_block = includes_block
 
+        self.manifest_updates = {}
+        self.return_manifest_updates = manifest_updates
+
         self.components_dict = {}
+
+    def mergeDict(self, dict1, dict2):
+        ''' Merge dictionaries and keep values of common keys in list'''
+        dict3 = {**dict1, **dict2}
+        for key, value in dict3.items():
+            if key in dict1 and key in dict2:
+                    dict3[key] = [value , dict1[key]]
+        return dict3
 
     def load_custom_bindings(self):
         path = 'custom_bindings'
@@ -101,9 +112,8 @@ class Builder():
             binding_type = ''
             binding_template = ''
 
-        
-
-        binding.update({"variable_template": [("declare_{type}".format(type=binding_type), binding_template)]})
+        binding.update({"variable_template": [
+                       ("declare_{type}".format(type=binding_type), binding_template)]})
         # binding.update({"binding": binding_template})
         self.variables_block.update({name: binding})
 
@@ -159,6 +169,12 @@ class Builder():
         binding.update({'signature_template': component_name})
         self.signatures_block.update({name: binding})
 
+    def build_manifest(self, component_name, component_filename):
+        with open(component_filename, 'r') as f:
+            manifest = json.load(f)
+
+            self.manifest_updates = self.mergeDict(self.manifest_updates, manifest)
+
     def get_custom_binding(self, component_key):
 
         component_list = self.components_dict.get(component_key, [])
@@ -176,8 +192,12 @@ class Builder():
                 self.build_handler(component, component_filename)
             elif '.signature' in component_lower:
                 self.build_signature(component, component_filename)
+            elif '.manifest' in component:
+                self.build_manifest(component, component_filename)
 
     def build(self):
         self.load_custom_bindings()
         for binding in self.bindings:
             self.get_custom_binding(binding.get('name'))
+
+        return self.manifest_updates
