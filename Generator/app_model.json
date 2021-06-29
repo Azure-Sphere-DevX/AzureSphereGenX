@@ -1,11 +1,11 @@
 {
   "bindings": {
-    "cloud_config": [
+    "azure-iot": [
       {
         "name": "glovebox-demo",
         "enabled": false,        
         "manifest": {
-          "CmdArgs": [ "--ScopeID","Your_ID_Scope" ],
+          "CmdArgs": [ "--ScopeID","REPLACE_WITH_YOUR_ID_SCOPE" ],
           "Capabilities": {
             "DeviceAuthentication": "",
             "AllowedConnections": []
