@@ -12,6 +12,7 @@ from builders import timer_bindings
 from builders import gpio_in_bindings
 from builders import gpio_out_bindings
 from builders import custom_bindings
+from builders import azure_iot_config
 
 
 # declare dictionaries
@@ -70,7 +71,22 @@ def load_bindings():
     custom = custom_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
                                      handlers_block=handlers_block, includes_block=includes_block, manifest_updates=manifest_updates)
 
-    builders = [dt, dm, timers, gpio_input, gpio_output, custom]
+    azure_iot = azure_iot_config.Builder(data, manifest_updates=manifest_updates)
+
+
+
+    dt.build()
+    dm.build()
+    timers.build()
+    gpio_input.build()
+    gpio_output.build()
+
+    manifest_updates = azure_iot.build(manifest_updates)
+    manifest_updates = custom.build(manifest_updates)
+    
+
+    # builders = [dt, dm, timers, gpio_input, gpio_output, custom]
+
 
 
 def get_value(properties, key, default):
@@ -93,11 +109,12 @@ def load_templates():
                 templates.update({template_key: tf.read()})
 
 
-def build_buckets():
-    global manifest_updates
-    for builder in builders:
-        # this is a hack - only the last builder - custom returns a manifest object
-        manifest_updates = builder.build()
+# def build_buckets():
+#     # global manifest_updates
+#     # for builder in builders:
+#     #     # this is a hack - only the last builder - custom returns a manifest object
+#     #     manifest_updates = builder.build()
+#     pass
 
 
 def render_signatures(f):
@@ -292,35 +309,17 @@ def update_manifest():
         manifest = json.load(f)
 
 
-    for root_object in manifest_updates:
-        items = manifest_updates.get(root_object)
-        
-        for key in items:
-            value_type = type(key)
-            if value_type == bool or value_type == str:
-                value = items.get(key)
-                manifest[root_object][key] = value
-                continue
-            
-            if value_type == dict:
-                for item in key:
-
-                    value = key.get(item)
-                    value_type = type(value)
-
-                    if value_type == bool or value_type == str:
-                        manifest[root_object][item] = value
-                        continue
-
-                    if value_type == list:
-                        existing = manifest.get(root_object).get(item)
-                        if existing is not None:
-                            for item in value:
-                                if item not in existing:
-                                    manifest[root_object][item] = value
-                        else:
-                            manifest[root_object][item] = value
-
+    for root_key, root_value in manifest_updates.items():
+        if type(root_value) is list:
+            for key in root_value:
+                if type(key) is dict:
+                    for i in key:
+                        manifest[root_key][i] = key.get(i)
+                elif type(key) is str:
+                    item_list = manifest.get(root_key, [])
+                    if key not in item_list:
+                        item_list.append(key)
+                        manifest.update({root_key:item_list})
 
     with open(generated_project_path + "/app_manifest.json", "w") as f:
         json.dump(manifest, f, indent=2)
@@ -350,13 +349,13 @@ def process_update():
     init_stuff()
     load_bindings()
     load_templates()
-    build_buckets()
+    # build_buckets()
     load_main()
     write_main()
     update_manifest()
 
 
-process_update()
+# process_update()
 
 
 watch_file = 'app_model.json'

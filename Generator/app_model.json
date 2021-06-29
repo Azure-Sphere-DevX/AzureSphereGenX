@@ -1,147 +1,157 @@
 {
   "bindings": {
-    "azure-iot": [
+    "azure_iot": [
       {
         "name": "glovebox-demo",
-        "enabled": false,        
+        "enabled": false,
         "manifest": {
-          "CmdArgs": [ "--ScopeID","REPLACE_WITH_YOUR_ID_SCOPE" ],
-          "Capabilities": {
-            "DeviceAuthentication": "",
-            "AllowedConnections": []
-          }
+          "CmdArgs": [
+            "--ScopeID",
+            "dave0ne000F25AF"
+          ],
+          "Capabilities": [
+            {
+              "DeviceAuthentication": "78327tqwyetyuwtetyquw"
+            },
+            {
+              "AllowedConnections": [
+                "gghgh",
+                "hjhjhj",
+                "khjhjh"
+              ]
+            }
+          ]
         }
       }
+    ],
+    "device_twins": [
+      {
+        "name": "SetDesiredTemperature",
+        "enabled": false,
+        "properties": {
+          "cloud2device": true,
+          "type": "float"
+        }
+      },
+      {
+        "name": "SetDesiredCO2AlertLevel",
+        "enabled": false,
+        "properties": {
+          "cloud2device": true,
+          "type": "double"
+        }
+      },
+      {
+        "name": "ReportTemperature",
+        "enabled": false,
+        "properties": {
+          "type": "float"
+        }
+      }
+    ],
+    "direct_methods": [
+      {
+        "name": "LightOn",
+        "enabled": false
+      },
+      {
+        "name": "LightOff",
+        "enabled": false
+      }
+    ],
+    "timers": [
+      {
+        "name": "MeasureTemperature",
+        "enabled": false,
+        "properties": {
+          "period": "{ 5, 0 }",
+          "type": "periodic"
+        }
+      },
+      {
+        "name": "MeasureCarbonMonoxide",
+        "enabled": false,
+        "properties": {
+          "type": "oneshot",
+          "autostart": true,
+          "period": "{ 5, 0 }"
+        }
+      },
+      {
+        "name": "ReportStartTime",
+        "enabled": false,
+        "properties": {
+          "period": "{ 5, 0 }",
+          "type": "oneshot",
+          "autostart": true
+        }
+      }
+    ],
+    "gpio_outputs": [
+      {
+        "name": "CloudStatusLed",
+        "enabled": false,
+        "properties": {
+          "pin": "NETWORK_CONNECTED_LED",
+          "initialState": "GPIO_Value_Low",
+          "invertPin": true,
+          "period": "{ 5, 0 }"
+        }
+      },
+      {
+        "name": "Relay1",
+        "enabled": false,
+        "properties": {
+          "pin": "RELAY",
+          "initialState": "GPIO_Value_Low",
+          "invertPin": true
+        }
+      }
+    ],
+    "gpio_inputs": [
+      {
+        "name": "ButtonA",
+        "enabled": false,
+        "properties": {
+          "pin": "BUTTON_A",
+          "detect": "DX_GPIO_DETECT_LOW",
+          "period": "{ 0, 200000000 }"
+        }
+      }
+    ],
+    "custom": [
+      {
+        "name": "DeferredUpdate",
+        "description": "Deferred update framework and a device twin to report status",
+        "warning": "The app_manifest.json file is updated with the following capabilities: SystemEventNotifications and SoftwareUpdateDeferral",
+        "enabled": false
+      },
+      {
+        "name": "PublishTelemetryAzureIoT",
+        "description": "Publish telemetry to Azure IoT",
+        "enabled": false
+      },
+      {
+        "name": "RestartDevice",
+        "description": "Restart device from a direct method",
+        "warning": "The app_manifest.json file is updated with the following capabilities:  PowerControls, ForceReboot",
+        "enabled": false
+      },
+      {
+        "name": "DirectMethodLightControl",
+        "description": "Turn light/relay on and off from a direct method",
+        "enabled": false
+      },
+      {
+        "name": "Watchdog",
+        "description": "Watchdog on a 30 second refresh cadence",
+        "enabled": false
+      },
+      {
+        "name": "ReportStartup",
+        "description": "Report start utc time and software version",
+        "enabled": false
+      }
     ]
-  },
-  "device_twins": [
-    {
-      "name": "SetDesiredTemperature",
-      "enabled": false,
-      "properties": {
-        "cloud2device": true,
-        "type": "float"
-      }
-    },
-    {
-      "name": "SetDesiredCO2AlertLevel",
-      "enabled": false,
-      "properties": {
-        "cloud2device": true,
-        "type": "double"
-      }
-    },
-    {
-      "name": "ReportTemperature",
-      "enabled": false,
-      "properties": {
-        "type": "float"
-      }
-    }
-  ],
-  "direct_methods": [
-    {
-      "name": "LightOn",
-      "enabled": false
-    },
-    {
-      "name": "LightOff",
-      "enabled": false
-    }
-  ],
-  "timers": [
-    {
-      "name": "MeasureTemperature",
-      "enabled": false,
-      "properties": {
-        "period": "{ 5, 0 }",
-        "type": "periodic"
-      }
-    },
-    {
-      "name": "MeasureCarbonMonoxide",
-      "enabled": false,
-      "properties": {
-        "type": "oneshot",
-        "autostart": true,
-        "period": "{ 5, 0 }"
-      }
-    },
-    {
-      "name": "ReportStartTime",
-      "enabled": false,
-      "properties": {
-        "period": "{ 5, 0 }",
-        "type": "oneshot",
-        "autostart": true
-      }
-    }
-  ],
-  "gpio_outputs": [
-    {
-      "name": "CloudStatusLed",
-      "enabled": false,
-      "properties": {
-        "pin": "NETWORK_CONNECTED_LED",
-        "initialState": "GPIO_Value_Low",
-        "invertPin": true,
-        "period": "{ 5, 0 }"
-      }
-    },
-    {
-      "name": "Relay1",
-      "enabled": false,
-      "properties": {
-        "pin": "RELAY",
-        "initialState": "GPIO_Value_Low",
-        "invertPin": true
-      }
-    }
-  ],
-  "gpio_inputs": [
-    {
-      "name": "ButtonA",
-      "enabled": false,
-      "properties": {
-        "pin": "BUTTON_A",
-        "detect": "DX_GPIO_DETECT_LOW",
-        "period": "{ 0, 200000000 }"
-      }
-    }
-  ],
-  "custom": [
-    {
-      "name": "DeferredUpdate",
-      "description": "Deferred update framework and a device twin to report status",
-      "warning": "The app_manifest.json file is updated with the following capabilities: SystemEventNotifications and SoftwareUpdateDeferral",
-      "enabled": false
-    },
-    {
-      "name": "PublishTelemetryAzureIoT",
-      "description": "Publish telemetry to Azure IoT",
-      "enabled": false
-    },
-    {
-      "name": "RestartDevice",
-      "description": "Restart device from a direct method",
-      "warning": "The app_manifest.json file is updated with the following capabilities:  PowerControls, ForceReboot",
-      "enabled": false
-    },
-    {
-      "name": "DirectMethodLightControl",
-      "description": "Turn light/relay on and off from a direct method",
-      "enabled": false
-    },
-    {
-      "name": "Watchdog",
-      "description": "Watchdog on a 30 second refresh cadence",
-      "enabled": false
-    },
-    {
-      "name": "ReportStartup",
-      "description": "Report start utc time and software version",
-      "enabled": false
-    }
-  ]
-}
+  }
 }

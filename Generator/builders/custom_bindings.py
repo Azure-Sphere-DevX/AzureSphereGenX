@@ -2,14 +2,6 @@ import os
 import json
 
 
-signatures_block = {}
-timer_block = {}
-variables_block = {}
-handlers_block = {}
-includes_block = {}
-templates = {}
-
-
 class Builder():
     def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block, manifest_updates):
 
@@ -173,7 +165,17 @@ class Builder():
         with open(component_filename, 'r') as f:
             manifest = json.load(f)
 
-            self.manifest_updates = self.mergeDict(self.manifest_updates, manifest)
+            for k,v in manifest.items():
+                item_list = self.manifest_updates.get(k)
+                if item_list is not None:
+                    item_list.append(v)
+                    self.manifest_updates.update({k:item_list})
+                else:
+                    self.manifest_updates.update({k:v})
+
+
+
+            # self.manifest_updates = self.mergeDict(self.manifest_updates, manifest)
 
     def get_custom_binding(self, component_key):
 
@@ -195,7 +197,8 @@ class Builder():
             elif '.manifest' in component:
                 self.build_manifest(component, component_filename)
 
-    def build(self):
+    def build(self, manifest):
+        self.manifest_updates = manifest
         self.load_custom_bindings()
         for binding in self.bindings:
             self.get_custom_binding(binding.get('name'))
