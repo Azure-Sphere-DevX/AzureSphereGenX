@@ -223,11 +223,15 @@ def render_handler_block():
 
 
 def render_includes_block():
+
+    if not os.path.isdir(generated_project_path + '/gx_includes'):
+        os.mkdir(generated_project_path + '/gx_includes') 
+
     for item in includes_block:
 
         block = includes_block.get(item)
         name = block.get('name')
-        filename = generated_project_path + '/gx_' + block.get('name') + '.h'
+        filename = generated_project_path + '/gx_includes/gx_' + block.get('name') + '.h'
 
         if os.path.isfile(filename):
             continue
@@ -243,7 +247,7 @@ def render_includes_block():
                 include_file.write(templates.get(
                     template_key).format(name=name))
 
-    with open(generated_project_path + '/gx_includes.h', 'w') as includes:
+    with open(generated_project_path + '/gx_includes/gx_includes.h', 'w') as includes:
         includes.write('#pragma once\n\n')
         for name in includes_block:
             includes.write('#include "gx_' + name + '.h"\n')
