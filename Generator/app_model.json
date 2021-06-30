@@ -14,7 +14,7 @@
               "DeviceAuthentication": "REPLACE_WITH_YOUR_TENANT_ID"
             },
             {
-              "AllowedConnections": []
+              "AllowedConnections": [ "REPLACE_WITH_REQUIRED_ENDPOINTS"]
             }
           ]
         }
