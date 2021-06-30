@@ -184,7 +184,8 @@ class Builder():
                                     new_list = manifest_list_value + v
                                     new_list = list(dict.fromkeys(new_list))
                                     manifest_list.update({k:new_list})
-                                elif type(manifest_list_value) is str:
+                                else:
+                                    # elif type(manifest_list_value) is str:
                                     manifest_list.update({k:v})                            
                     new_manifest.update({key:manifest_list})
                 elif  type(manifest_list) is list:   

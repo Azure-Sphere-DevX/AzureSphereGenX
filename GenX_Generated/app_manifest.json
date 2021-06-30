@@ -7,7 +7,18 @@
     "Gpio": [
       "$NETWORK_CONNECTED_LED",
       "$RELAY"
-    ]
+    ],
+    "DeviceAuthentication": "REPLACE_WITH_YOUR_TENANT_ID",
+    "AllowedConnections": [
+      "REPLACE_WITH_REQUIRED_ENDPOINTS"
+    ],
+    "SystemEventNotifications": false,
+    "SoftwareUpdateDeferral": false,
+    "PowerControls": []
   },
-  "ApplicationType": "Default"
+  "ApplicationType": "Default",
+  "CmdArgs": [
+    "--ScopeID",
+    "REPLACE_WITH_YOUR_ID_SCOPE"
+  ]
 }
