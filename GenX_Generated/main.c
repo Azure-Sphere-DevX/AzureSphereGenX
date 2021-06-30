@@ -40,7 +40,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
-#include <math.h>
 
 #define APPLICATION_VERSION "1.5"
 const char PNP_MODEL_ID[] = "dtmi:com:example:application;1";
@@ -93,80 +92,4 @@ int main(int argc, char* argv[]) {{
 }}
 
 // Main code blocks
-
-
-/// GENX_BEGIN ID:PublishTelemetry MD5:434103d1ffb397152b9ff44f5d6200ab
-/// <summary>
-/// Publish environment sensor telemetry to IoT Hub/Central
-/// </summary>
-/// <param name="eventLoopTimer"></param>
-static void PublishTelemetry_gx_handler(EventLoopTimer *eventLoopTimer) {
-
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }
-
-    float temperature = 30.0f;
-    float humidity = 60.0f;
-    float pressure = 1010.0f;
-
-#ifdef GX_AVNET_IOT_CONNECT        
-
-    if (dx_avnetIotConnectisConnected()) {
-
-        // Serialize telemetry as JSON
-		bool serialization_result = dx_avnetIotConnectJsonSerialize(gx_PublishTelemetryBuffer, sizeof(gx_PublishTelemetryBuffer), 3, 
-            DX_JSON_DOUBLE, "Temperature", temperature, 
-            DX_JSON_DOUBLE, "Humidity", humidity,
-            DX_JSON_DOUBLE, "Pressure", pressure);
-#else
-    if (dx_isAzureConnected()) {
-
-		bool serialization_result = dx_jsonSerialize(gx_PublishTelemetryBuffer, sizeof(gx_PublishTelemetryBuffer), 3, 
-            DX_JSON_DOUBLE, "Temperature", temperature, 
-            DX_JSON_DOUBLE, "Humidity", humidity,
-            DX_JSON_DOUBLE, "Pressure", pressure);
-#endif 
-
-        if (serialization_result) {
-            Log_Debug("%s\n", gx_PublishTelemetryBuffer);
-            
-            dx_azurePublish(gx_PublishTelemetryBuffer, strlen(gx_PublishTelemetryBuffer), gx_PublishTelemetryMessageProperties, 
-                            NELEMS(gx_PublishTelemetryMessageProperties), &gx_PublishTelemetryContentProperties);
-        
-        } else {
-            Log_Debug("gx_PublishTelemetryBuffer to small to serialize JSON\n");
-        }
-
-    }
-}
-/// GENX_END ID:PublishTelemetry
-
-
-/// GENX_BEGIN ID:ReportStartup MD5:4706a9cfe6586d876bb49926860b4c9f
-/// <summary>
-/// Implement your timer function
-/// </summary>
-static void ReportStartup_gx_handler(EventLoopTimer *eventLoopTimer) {
-   if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-       dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-       return;
-   }
-
-	char version[60];
-	char utc[30];
-
-	if (dx_isAzureConnected()) {
-
-		dx_deviceTwinReportState(&dt_DeviceStartUtc, dx_getCurrentUtc(utc, sizeof(utc)));
-
-		snprintf(version, sizeof(version), "Application version: %s, DevX version: %s", APPLICATION_VERSION, AZURE_SPHERE_DEVX_VERSION);
-		dx_deviceTwinReportState(&dt_SoftwareVersion, version);
-
-	} else {
-		dx_timerOneShotSet(&tmr_ReportStartup, &(struct timespec) { 5, 0 });
-	}
-}
-/// GENX_END ID:ReportStartup
 
