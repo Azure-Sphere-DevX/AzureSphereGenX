@@ -33,7 +33,7 @@
  *
  ************************************************************************************************/
 
-#include "gx_declarations.h"
+#include "gx_includes/gx_declarations.h"
 
 #include "applibs_versions.h"
 #include <applibs/log.h>

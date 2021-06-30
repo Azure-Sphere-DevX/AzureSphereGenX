@@ -3,7 +3,7 @@ import json
 
 
 class Builder():
-    def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block, manifest_updates):
+    def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block):
 
         self.bindings = list(elem for elem in data.get('bindings').get(
             'custom') if elem.get('enabled', True) == True)
@@ -16,7 +16,7 @@ class Builder():
         self.includes_block = includes_block
 
         self.manifest_updates = {}
-        self.return_manifest_updates = manifest_updates
+        self.manifest = {}
 
         self.components_dict = {}
 
@@ -163,19 +163,35 @@ class Builder():
 
     def build_manifest(self, component_name, component_filename):
         with open(component_filename, 'r') as f:
-            manifest = json.load(f)
+            custom_manifest = json.load(f)
 
-            for k,v in manifest.items():
-                item_list = self.manifest_updates.get(k)
-                if item_list is not None:
-                    item_list.append(v)
-                    self.manifest_updates.update({k:item_list})
-                else:
-                    self.manifest_updates.update({k:v})
+        manifest_updates = {}
+        new_manifest = {}
+        new_manifest = {**self.manifest, **new_manifest}
 
+        manifest_updates = custom_manifest.get('manifest')
+        for key, value in manifest_updates.items():
+            if type(value) is list:
+                manifest_list = self.manifest.get(key, [])
+                if type(manifest_list) is dict:
+                    for item in value:
+                        for k, v in item.items():
+                            manifest_list_value = manifest_list.get(k)
+                            if manifest_list_value is None:
+                                manifest_list.update({k:v})
+                            else:
+                                if type(manifest_list_value) is list:
+                                    new_list = manifest_list_value + v
+                                    new_list = list(dict.fromkeys(new_list))
+                                    manifest_list.update({k:new_list})
+                                elif type(manifest_list_value) is str:
+                                    manifest_list.update({k:v})                            
+                    new_manifest.update({key:manifest_list})
+                elif  type(manifest_list) is list:   
+                    new_list = manifest_list + value
+                    new_list = list(dict.fromkeys(new_list))
+                    new_manifest.update({key:new_list})
 
-
-            # self.manifest_updates = self.mergeDict(self.manifest_updates, manifest)
 
     def get_custom_binding(self, component_key):
 
@@ -198,9 +214,9 @@ class Builder():
                 self.build_manifest(component, component_filename)
 
     def build(self, manifest):
-        self.manifest_updates = manifest
+        self.manifest = manifest
         self.load_custom_bindings()
         for binding in self.bindings:
             self.get_custom_binding(binding.get('name'))
 
-        return self.manifest_updates
+        return self.manifest

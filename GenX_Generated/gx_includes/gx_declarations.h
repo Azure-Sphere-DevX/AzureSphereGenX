@@ -12,7 +12,7 @@
 #include "dx_version.h"
 #include "dx_deferred_update.h"
 
-#include "gx_includes/gx_includes.h"
+#include "gx_includes.h"
 
 #include <time.h>
 

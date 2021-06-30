@@ -24,7 +24,7 @@ includes_block = {}
 templates = {}
 
 
-manifest_updates = { }
+manifest_updates = {}
 device_twins_updates = None
 device_twin_variables = None
 autostart_oneshot_timer_list = []
@@ -49,7 +49,7 @@ def load_bindings():
     includes_block = {}
     templates = {}
     binding_variables = {}
-    manifest_updates = { }
+    manifest_updates = {}
 
     time.sleep(0.5)
     with open('app_model.json', 'r') as j:
@@ -66,14 +66,11 @@ def load_bindings():
     gpio_output = gpio_out_bindings.Builder(data, signatures=signatures_block, variables_block=variables_block,
                                             handlers_block=handlers_block, timer_block=timer_block)
 
-# def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block):
-
     custom = custom_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
-                                     handlers_block=handlers_block, includes_block=includes_block, manifest_updates=manifest_updates)
+                                     handlers_block=handlers_block, includes_block=includes_block)
 
-    azure_iot = azure_iot_config.Builder(data, manifest_updates=manifest_updates)
-
-
+    azure_iot = azure_iot_config.Builder(
+        data, manifest_updates=manifest_updates)
 
     dt.build()
     dm.build()
@@ -81,12 +78,13 @@ def load_bindings():
     gpio_input.build()
     gpio_output.build()
 
-    manifest_updates = azure_iot.build(manifest_updates)
+    with open(generated_project_path + "/app_manifest.json", "r") as f:
+        manifest = json.load(f)
+
+    manifest_updates = azure_iot.build(manifest)
     manifest_updates = custom.build(manifest_updates)
-    
 
     # builders = [dt, dm, timers, gpio_input, gpio_output, custom]
-
 
 
 def get_value(properties, key, default):
@@ -107,14 +105,6 @@ def load_templates():
             template_key = path.name.split(".")[0]
             with open(path, "r") as tf:
                 templates.update({template_key: tf.read()})
-
-
-# def build_buckets():
-#     # global manifest_updates
-#     # for builder in builders:
-#     #     # this is a hack - only the last builder - custom returns a manifest object
-#     #     manifest_updates = builder.build()
-#     pass
 
 
 def render_signatures(f):
@@ -147,9 +137,12 @@ def render_variable_block(f):
             var_list.append(name)
             binding_variables.update({binding: var_list})
 
-            pin = get_value(properties, 'pin', 'GX_PIN_NOT_DECLARED_IN_GENX_MODEL')
-            initialState = get_value(properties, 'initialState', 'GPIO_Value_Low')
-            invert = "true" if get_value(properties, 'invertPin', True) else "false"
+            pin = get_value(properties, 'pin',
+                            'GX_PIN_NOT_DECLARED_IN_GENX_MODEL')
+            initialState = get_value(
+                properties, 'initialState', 'GPIO_Value_Low')
+            invert = "true" if get_value(
+                properties, 'invertPin', True) else "false"
 
             twin_type = get_value(properties, 'type', None)
             twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
@@ -225,13 +218,14 @@ def render_handler_block():
 def render_includes_block():
 
     if not os.path.isdir(generated_project_path + '/gx_includes'):
-        os.mkdir(generated_project_path + '/gx_includes') 
+        os.mkdir(generated_project_path + '/gx_includes')
 
     for item in includes_block:
 
         block = includes_block.get(item)
         name = block.get('name')
-        filename = generated_project_path + '/gx_includes/gx_' + block.get('name') + '.h'
+        filename = generated_project_path + \
+            '/gx_includes/gx_' + block.get('name') + '.h'
 
         if os.path.isfile(filename):
             continue
@@ -278,12 +272,14 @@ def render_autostart_timers(f):
     f.write(templates.get('declare_bindings_timer_autostart_oneshot').format(
         autostart_timer_list=autostart_timer_list))
 
-    # autostart_oneshot_timer_list = []
-
 
 def write_main():
     global device_twins_updates, device_twin_variables
-    with open(generated_project_path + '/gx_declarations.h', 'w') as df:
+
+    if not os.path.isdir(generated_project_path + '/gx_includes'):
+        os.mkdir(generated_project_path + '/gx_includes')
+
+    with open(generated_project_path + '/gx_includes/gx_declarations.h', 'w') as df:
 
         df.write(templates["declarations"])
 
@@ -308,25 +304,10 @@ def write_main():
         with open(generated_project_path + "/main.c", "w") as mf:
             mf.writelines(code_lines)
 
+
 def update_manifest():
-    with open(generated_project_path + "/app_manifest.json", "r") as f:
-        manifest = json.load(f)
-
-
-    for root_key, root_value in manifest_updates.items():
-        if type(root_value) is list:
-            for key in root_value:
-                if type(key) is dict:
-                    for i in key:
-                        manifest[root_key][i] = key.get(i)
-                elif type(key) is str:
-                    item_list = manifest.get(root_key, [])
-                    if key not in item_list:
-                        item_list.append(key)
-                        manifest.update({root_key:item_list})
-
     with open(generated_project_path + "/app_manifest.json", "w") as f:
-        json.dump(manifest, f, indent=2)
+        json.dump(manifest_updates, f, indent=2)
 
 
 def load_main():
@@ -353,7 +334,6 @@ def process_update():
     init_stuff()
     load_bindings()
     load_templates()
-    # build_buckets()
     load_main()
     write_main()
     update_manifest()

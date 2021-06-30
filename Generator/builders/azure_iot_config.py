@@ -1,4 +1,3 @@
-
 import json
 
 
@@ -10,24 +9,48 @@ class Builder():
 
         self.manifest_updates = manifest_updates
 
-    def mergeDict(self, dict1, dict2):
-        ''' Merge dictionaries and keep values of common keys in list'''
-        dict3 = {**dict1, **dict2}
-        for key, value in dict3.items():
-            if key in dict1 and key in dict2:
-                print(type(key))
-                dict3[key] = [value, dict1[key]]
-        return dict3
+    def string_escape(self, s, encoding='utf-8'):
+        return (s.encode('latin1')         # To bytes, required by 'unicode-escape'
+                .decode('unicode-escape') # Perform the actual octal-escaping decode
+                .encode('latin1')         # 1:1 mapping back to bytes
+                .decode(encoding))        # Decode original encoding
 
-    def build(self, existing_manifest):
+    def build(self, manifest):
         manifest_updates = {}
-        for item in self.bindings:
-            print(item)
-            manifest = item.get('manifest')
-            return manifest
-            manifest_updates = self.mergeDict(manifest_updates, manifest)
+        new_manifest = {}
+        new_manifest = {**manifest, **new_manifest}
 
-        return manifest_updates
+        for item in self.bindings:
+            manifest_updates = item.get('manifest')
+
+            for key, value in manifest_updates.items():
+                if type(value) is list:
+                    manifest_list = manifest.get(key, [])
+                    if type(manifest_list) is dict:
+                        for item in value:
+                            for k, v in item.items():
+                                manifest_list_value = manifest_list.get(k)
+                                if manifest_list_value is None:
+                                    manifest_list.update({k:v})
+                                else:
+                                    if type(manifest_list_value) is list:
+                                        new_list = manifest_list_value + v
+                                        new_list = list(dict.fromkeys(new_list))
+                                        manifest_list.update({k:new_list})
+                                    elif type(manifest_list_value) is str:
+                                        manifest_list.update({k:v})                            
+                        new_manifest.update({key:manifest_list})
+                    elif  type(manifest_list) is list:  
+                        new_list = value + manifest_list
+                        new_list = list(dict.fromkeys(new_list))
+                        new_manifest.update({key:new_list})
+
+        return new_manifest
+
+
+            
+
+        # return existing_manifest
 
 
             # for key, value in manifest.items():

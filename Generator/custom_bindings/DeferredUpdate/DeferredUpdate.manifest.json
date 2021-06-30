@@ -1,10 +1,12 @@
 {
+  "manifest": {
     "Capabilities": [
-        {
-            "SystemEventNotifications": true
-        },
-        {
-            "SoftwareUpdateDeferral": true
-        }
+      {
+        "SystemEventNotifications": true
+      },
+      {
+        "SoftwareUpdateDeferral": true
+      }
     ]
+  }
 }
