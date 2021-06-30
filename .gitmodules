@@ -1,6 +1,7 @@
 [submodule "GenX_Generated/AzureSphereDevX"]
 	path = GenX_Generated/AzureSphereDevX
-	url = https://github.com/gloveboxes/AzureSphereDevX.git
+	url = https://github.com/bawilless/AzureSphereDevX.git
+#	url = https://github.com/gloveboxes/AzureSphereDevX.git
 [submodule "GenX_Generated/Drivers"]
 	path = GenX_Generated/Drivers
 	url = https://github.com/gloveboxes/AzureSphereDrivers.git
