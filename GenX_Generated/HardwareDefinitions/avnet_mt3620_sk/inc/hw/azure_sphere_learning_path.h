@@ -18,7 +18,7 @@
 // Button B
 #define BUTTON_B AVNET_MT3620_SK_USER_BUTTON_B
 
-// App status LED
+// Alert LED
 #define ALERT_LED AVNET_MT3620_SK_USER_LED_RED
 
 // LED 1
@@ -29,6 +29,12 @@
 
 // AVNET: Network Connected
 #define NETWORK_CONNECTED_LED AVNET_MT3620_SK_WLAN_STATUS_LED_YELLOW
+
+// Relay Click in Click 1 slot.
+#define RELAY_CLICK_RELAY1 AVNET_MT3620_SK_GPIO0
+
+// Relay Click in Click 1 slot.
+#define RELAY_CLICK_RELAY2 AVNET_MT3620_SK_GPIO34
 
 // Click Relay
 #define RELAY AVNET_MT3620_SK_GPIO0
