@@ -30,8 +30,14 @@
 // AVNET: Network Connected
 #define NETWORK_CONNECTED_LED AVNET_MT3620_SK_WLAN_STATUS_LED_YELLOW
 
+// Relay Click in Click 1 slot.
+#define RELAY_CLICK_RELAY1 AVNET_MT3620_SK_GPIO1
+
+// Relay Click in Click 1 slot.
+#define RELAY_CLICK_RELAY2 AVNET_MT3620_SK_GPIO32
+
 // Click Relay
-#define RELAY AVNET_MT3620_SK_GPIO0
+#define RELAY AVNET_MT3620_SK_GPIO1
 
 // AVNET Start Kit Definition
 #define I2cMaster2 AVNET_MT3620_SK_ISU2_I2C
