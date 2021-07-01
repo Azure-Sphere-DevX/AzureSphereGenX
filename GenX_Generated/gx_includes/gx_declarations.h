@@ -22,22 +22,29 @@ extern const char PNP_MODEL_ID[];
 extern const char NETWORK_INTERFACE[];
 
 #define ONE_MS 1000000		// used to simplify timer defn.
+#define LOG_BUFFER_SIZE 256
 #define Log_Debug(f_, ...) dx_Log_Debug((f_), ##__VA_ARGS__)
-static char Log_Debug_buffer[128];
+static char Log_Debug_buffer[LOG_BUFFER_SIZE];
 
 
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static void PublishTelemetry_gx_handler(EventLoopTimer *eventLoopTimer);
+static void ReportStartup_gx_handler(EventLoopTimer *eventLoopTimer);
 
 
 /****************************************************************************************
 * Binding declarations
 ****************************************************************************************/
+static DX_TIMER_BINDING tmr_PublishTelemetry = { .period = { 5, 0 }, .name = "PublishTelemetry", .handler = PublishTelemetry_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_DeviceStartUtc = { .twinProperty = "DeviceStartUtc", .twinType = DX_TYPE_STRING };
+static DX_TIMER_BINDING tmr_ReportStartup = { .name = "ReportStartup", .handler = ReportStartup_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_SoftwareVersion = { .twinProperty = "SoftwareVersion", .twinType = DX_TYPE_STRING };
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DeviceStartUtc, &dt_SoftwareVersion };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
 static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
@@ -47,10 +54,10 @@ static DX_GPIO_BINDING *gpio_bindings[] = {  };
 
 // All timers referenced in timer_bindings will be opened in the gx_initPeripheralAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = {  };
+static DX_TIMER_BINDING *timer_bindings[] = { &tmr_PublishTelemetry, &tmr_ReportStartup };
 
 // All timers referenced in timer_bindings_oneshot will be started in the gx_initPeripheralAndHandlers function
-static DX_TIMER_BINDING *timer_bindings_oneshot[] = {  };
+static DX_TIMER_BINDING *timer_bindings_oneshot[] = { &tmr_ReportStartup };
 
 
 /****************************************************************************************
@@ -67,6 +74,10 @@ static void gx_initPeripheralAndHandlers(void)
         dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
     }
 #endif // GX_AZURE_IOT
+
+#ifdef GX_AVNET_IOT_CONNECT
+    dx_avnetIotConnectInit();
+#endif     
 
     if (NELEMS(gpio_bindings) > 0) {
         dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));
