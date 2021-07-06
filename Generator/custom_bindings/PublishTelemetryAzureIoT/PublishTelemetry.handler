@@ -18,9 +18,9 @@ static void {name}_gx_handler(EventLoopTimer *eventLoopTimer) {{
 
         // Serialize telemetry as JSON
         bool serialization_result = dx_jsonSerialize(gx_{name}Buffer, sizeof(gx_{name}Buffer), 3, 
-            DX_JSON_DOUBLE, "Temperature", temperature, 
-            DX_JSON_DOUBLE, "Humidity", humidity,
-            DX_JSON_DOUBLE, "Pressure", pressure);
+            DX_JSON_FLOAT, "Temperature", temperature, 
+            DX_JSON_FLOAT, "Humidity", humidity,
+            DX_JSON_FLOAT, "Pressure", pressure);
 
         if (serialization_result) {{
             Log_Debug("%s\n", gx_{name}Buffer);
