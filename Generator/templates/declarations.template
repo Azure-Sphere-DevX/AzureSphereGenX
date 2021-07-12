@@ -3,6 +3,7 @@
 #include "hw/azure_sphere_learning_path.h" // Hardware definition
 
 #include "dx_azure_iot.h"
+#include "dx_avnet_iot_connect.h"
 #include "dx_config.h"
 #include "dx_exit_codes.h"
 #include "dx_gpio.h"
