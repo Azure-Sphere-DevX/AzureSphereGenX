@@ -7,7 +7,9 @@
 static void gx_initPeripheralAndHandlers(void)
 {
 
-#ifdef GX_AZURE_IOT
+#ifdef GX_AVNET_IOT
+    dx_avnetConnect(&dx_config, NETWORK_INTERFACE);
+#elif GX_AZURE_IOT
     dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
 #else
     if (NELEMS(device_twin_bindings) > 0 || NELEMS(direct_method_bindings) > 0) {
