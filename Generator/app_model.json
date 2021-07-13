@@ -137,6 +137,12 @@
         "enabled": false
       },   
       {
+        "name": "EnableAvnetIoT",
+        "description": "Include logic to connect to Avnet's IoT Connect Platform",
+        "enabled": true
+      },
+     
+      {
         "name": "PublishTelemetryAvnetIoT",
         "description": "Publish telemetry to Avnet's IoT Connect Platform",
         "enabled": false

@@ -1,0 +1,9 @@
+#pragma once
+#include "dx_azure_iot.h"
+#include "dx_avnet_iot_connect.h"
+
+/****************************************************************************************
+ * Telemetry message templates and property sets
+ ****************************************************************************************/
+#define GX_AZURE_IOT false
+#define GX_AVNET_IOT true
