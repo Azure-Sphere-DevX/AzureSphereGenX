@@ -116,8 +116,8 @@ def render_signatures(f):
 
 
 def render_variable_block(f):
-    device_twin_types = {"integer": "DX_TYPE_INT", "float": "DX_TYPE_FLOAT", "double": "DX_TYPE_DOUBLE",
-                         "boolean": "DX_TYPE_BOOL",  "string": "DX_TYPE_STRING"}
+    device_twin_types = {"integer": "DX_DEVICE_TWIN_INT", "float": "DX_DEVICE_TWIN_FLOAT", "double": "DX_DEVICE_TWIN_DOUBLE",
+                         "boolean": "DX_DEVICE_TWIN_BOOL",  "string": "DX_DEVICE_TWIN_STRING"}
 
     for item in variables_block:
         var = variables_block.get(item)
