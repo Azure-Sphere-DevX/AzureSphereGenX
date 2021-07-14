@@ -1,0 +1,2 @@
+static void setConnectionStatusLed(RGB_Status newNetworkStatus);
+static void updateConnectionStatusLed(void);
