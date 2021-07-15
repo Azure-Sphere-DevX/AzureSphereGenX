@@ -3,12 +3,12 @@
  *
  *   DISCLAIMER
  *
- *   The DevX library supports the Azure Sphere Developer Learning Path:
+ *   The Azure Sphere DevX library is a communitity drive library
  *
  *	   1. are built from the Azure Sphere SDK Samples at https://github.com/Azure/azure-sphere-samples
  *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
  *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
- *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning experience.
+
  *
  *   DEVELOPER BOARD SELECTION
  *
@@ -34,6 +34,8 @@
  ************************************************************************************************/
 
 #include "gx_includes/gx_declarations.h"
+
+#include "app_exit_codes.h"
 
 #include "applibs_versions.h"
 #include <applibs/log.h>
