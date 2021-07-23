@@ -1,0 +1,21 @@
+#pragma once
+#include "dx_azure_iot.h"
+#include "dx_avnet_iot_connect.h"
+
+/****************************************************************************************
+ * Telemetry message templates and property sets
+ ****************************************************************************************/
+#define GX_AZURE_IOT false
+#define GX_AVNET_IOT true
+
+// Number of bytes to allocate for the JSON telemetry message for IoT Hub/Central
+#define {name}_JSON_MESSAGE_LENGTH 128 + DX_AVNET_IOT_CONNECT_METADATA
+
+static char gx_{name}Buffer[{name}_JSON_MESSAGE_LENGTH] = {{0}};
+
+static DX_MESSAGE_PROPERTY *gx_{name}MessageProperties[] = {{
+    &(DX_MESSAGE_PROPERTY){{.key = "appid", .value = "hvac"}},
+    &(DX_MESSAGE_PROPERTY){{.key = "type", .value = "telemetry"}},
+    &(DX_MESSAGE_PROPERTY){{.key = "schema", .value = "1"}}}};
+
+static DX_MESSAGE_CONTENT_PROPERTIES gx_{name}ContentProperties = {{.contentEncoding = "utf-8", .contentType = "application/json"}};

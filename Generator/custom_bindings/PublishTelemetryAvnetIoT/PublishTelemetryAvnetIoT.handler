@@ -1,0 +1,64 @@
+/// <summary>
+/// Publish environment sensor telemetry to Avnet's IoT Connect Platform
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void {name}_gx_handler(EventLoopTimer *eventLoopTimer) {{
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }}
+
+    float temperature = 30.0f;
+    float humidity = 60.0f;
+    float pressure = 1010.0f;
+
+{device_twin_variables}
+    if (dx_isAvnetConnected()) {{
+
+		// Example #1: Pass in telemetry by <type, key, value> triples
+
+        // Serialize telemetry as JSON
+        bool serialization_result = dx_avnetJsonSerialize(gx_{name}Buffer, sizeof(gx_{name}Buffer), 3, 
+            DX_JSON_FLOAT, "Temperature", temperature, 
+            DX_JSON_FLOAT, "Humidity", humidity,
+            DX_JSON_FLOAT, "Pressure", pressure);
+
+        if (serialization_result) {{
+            Log_Debug("%s\n", gx_{name}Buffer);
+            
+            dx_azurePublish(gx_{name}Buffer, strlen(gx_{name}Buffer), gx_{name}MessageProperties, 
+                            NELEMS(gx_{name}MessageProperties), &gx_{name}ContentProperties);
+        
+        }} else {{
+            Log_Debug("gx_{name}Buffer to small to serialize JSON\n");
+        }}
+
+		// Example #2: Build JSON telemetry string, then add IoTConnect wrapper before sending it to the
+		// IoTHub
+
+		// Create a buffer and format specifier for the JSON document to send
+		char json_buffer[DX_AVNET_IOT_CONNECT_JSON_BUFFER_SIZE] = {{0}};
+	    static const char json_string_format[] =
+        "{{\"Temperature2\":%.1f,\"Humidity2\":%.1f,\"Pressure2\":%.1f}}";
+
+		// Create the JSON document
+        snprintf(json_buffer, DX_AVNET_IOT_CONNECT_JSON_BUFFER_SIZE, json_string_format, 
+				temperature, humidity, pressure);
+
+		// Call the routine that will wrap the JSON document with the IoT Connect specific data
+		serialization_result = dx_avnetJsonSerializePayload(json_buffer, gx_{name}Buffer, sizeof(gx_{name}Buffer));
+
+		// Send the telemetry
+        if (serialization_result) {{
+            Log_Debug("%s\n", gx_{name}Buffer);
+            
+            dx_azurePublish(gx_{name}Buffer, strlen(gx_{name}Buffer), gx_{name}MessageProperties, 
+                            NELEMS(gx_{name}MessageProperties), &gx_{name}ContentProperties);
+        
+        }} else {{
+            Log_Debug("gx_{name}Buffer to small to serialize JSON\n");
+        }}
+
+{device_twins_updates}    }}
+}}

@@ -31,10 +31,9 @@
     ],
     "device_twins": [
       {
-        "name": "SetDesiredTemperature",
+        "name": "ReportTemperature",
         "enabled": false,
         "properties": {
-          "cloud2device": true,
           "type": "float"
         }
       },
@@ -47,32 +46,25 @@
         }
       },
       {
-        "name": "ReportTemperature",
+        "name": "SetDesiredTemperature",
         "enabled": false,
         "properties": {
+          "cloud2device": true,
           "type": "float"
         }
       }
     ],
     "direct_methods": [
       {
-        "name": "LightOn",
+        "name": "LightOff",
         "enabled": false
       },
       {
-        "name": "LightOff",
+        "name": "LightOn",
         "enabled": false
       }
     ],
     "timers": [
-      {
-        "name": "MeasureTemperature",
-        "enabled": false,
-        "properties": {
-          "period": "{ 5, 0 }",
-          "type": "periodic"
-        }
-      },
       {
         "name": "MeasureCarbonMonoxide",
         "enabled": false,
@@ -80,6 +72,14 @@
           "type": "oneshot",
           "autostart": true,
           "period": "{ 5, 0 }"
+        }
+      },
+      {
+        "name": "MeasureTemperature",
+        "enabled": false,
+        "properties": {
+          "period": "{ 5, 0 }",
+          "type": "periodic"
         }
       },
       {
@@ -132,8 +132,33 @@
         "enabled": false
       },
       {
+        "name": "DirectMethodLightControl",
+        "description": "Turn light/relay on and off from a direct method",
+        "enabled": false
+      },
+      {
+        "name": "EnableAvnetIoT",
+        "description": "Include logic to connect to Avnet's IoT Connect Platform",
+        "enabled": false
+      },
+      {
+        "name": "NetworkStatusRgbLed",
+        "description": "Include logic to use the Avnet Starter Kit RGB LED to show IoTHub connection status",
+        "enabled": false
+      },
+      {
+        "name": "PublishTelemetryAvnetIoT",
+        "description": "Publish telemetry to Avnet's IoT Connect Platform",
+        "enabled": false
+      },
+      {
         "name": "PublishTelemetryAzureIoT",
         "description": "Publish telemetry to Azure IoT",
+        "enabled": false
+      },
+      {
+        "name": "ReportStartup",
+        "description": "Report start utc time and software version",
         "enabled": false
       },
       {
@@ -143,18 +168,8 @@
         "enabled": false
       },
       {
-        "name": "DirectMethodLightControl",
-        "description": "Turn light/relay on and off from a direct method",
-        "enabled": false
-      },
-      {
         "name": "Watchdog",
         "description": "Watchdog on a 30 second refresh cadence",
-        "enabled": false
-      },
-      {
-        "name": "ReportStartup",
-        "description": "Report start utc time and software version",
         "enabled": false
       }
     ]

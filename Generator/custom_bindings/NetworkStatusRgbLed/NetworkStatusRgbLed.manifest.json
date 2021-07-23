@@ -1,0 +1,13 @@
+{
+  "manifest": {
+    "Capabilities": [
+      {
+        "Gpio": [
+          "$LED_RED",
+          "$LED_GREEN",
+          "$LED_BLUE"
+        ]
+      }
+    ]
+  }
+}

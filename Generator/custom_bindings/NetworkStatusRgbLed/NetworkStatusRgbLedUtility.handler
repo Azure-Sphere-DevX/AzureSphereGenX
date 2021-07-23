@@ -1,0 +1,50 @@
+// Using the networkStatus value, turn on/off the connection status LEDs
+static void setConnectionStatusLed(RGB_Status newNetworkStatus)
+{{
+	static RGB_Status lastNetworkStatus = RGB_Invalid;
+
+	// Nothing to see here folks, move along . . .
+	if(lastNetworkStatus == newNetworkStatus){{
+		return;
+	}}
+
+	// Update the local static variable
+	lastNetworkStatus = newNetworkStatus;
+
+	// Turn off all the LED's then set the LED corresponding to the network status
+	dx_gpioOff(&gpio_RgbRed);
+	dx_gpioOff(&gpio_RgbGreen);
+	dx_gpioOff(&gpio_RgbBlue);
+
+	switch (newNetworkStatus)
+	{{
+		case RGB_No_Network: // RED LED on
+			dx_gpioOn(&gpio_RgbRed);
+			break;
+		case RGB_Network_Connected: // Green LED on
+			dx_gpioOn(&gpio_RgbGreen);
+			break;
+		case RGB_IoT_Hub_Connected: // Blue LED on
+			dx_gpioOn(&gpio_RgbBlue);
+			break;
+		case RGB_Invalid:
+		default:	
+			break;		
+	}}
+}}
+
+// Determine the network status and call the routine to set the status LEDs
+static void updateConnectionStatusLed(void)
+{{
+	// Assume we don't have a network connection
+    RGB_Status networkStatus = RGB_No_Network;
+
+	// Next check for Azure connectivity staus
+	if(dx_isAzureConnected()){{
+		networkStatus = RGB_IoT_Hub_Connected;
+	}}
+	else if (dx_isNetworkReady()){{
+		networkStatus = RGB_Network_Connected;
+	}}
+	setConnectionStatusLed(networkStatus);
+}}

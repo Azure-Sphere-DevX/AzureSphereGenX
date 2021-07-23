@@ -1,0 +1,14 @@
+/// <summary>
+/// Update the RGB connected status LEDs
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void {name}_gx_handler(EventLoopTimer *eventLoopTimer) {{
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }}
+{device_twin_variables}
+	updateConnectionStatusLed();
+{device_twins_updates}
+}}
