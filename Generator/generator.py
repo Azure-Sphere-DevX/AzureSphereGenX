@@ -13,6 +13,7 @@ from builders import gpio_in_bindings
 from builders import gpio_out_bindings
 from builders import custom_bindings
 from builders import azure_iot_config
+from builders import class_bindings
 
 
 # declare dictionaries
@@ -69,6 +70,9 @@ def load_bindings():
     custom = custom_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
                                      handlers_block=handlers_block, includes_block=includes_block)
 
+    classes = class_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
+                                     handlers_block=handlers_block, includes_block=includes_block)
+
     azure_iot = azure_iot_config.Builder(
         data, manifest_updates=manifest_updates)
 
@@ -83,6 +87,7 @@ def load_bindings():
 
     manifest_updates = azure_iot.build(manifest)
     manifest_updates = custom.build(manifest_updates)
+    manifest_updates = classes.build(manifest_updates)
 
     # builders = [dt, dm, timers, gpio_input, gpio_output, custom]
 
@@ -116,56 +121,52 @@ def render_signatures(f):
 
 
 def render_variable_block(f):
-    device_twin_types = {"integer": "DX_TYPE_INT", "float": "DX_TYPE_FLOAT", "double": "DX_TYPE_DOUBLE",
-                         "boolean": "DX_TYPE_BOOL",  "string": "DX_TYPE_STRING"}
+    device_twin_types = {"int": "DX_TYPE_INT", "float": "DX_TYPE_FLOAT", "double": "DX_TYPE_DOUBLE",
+                         "bool": "DX_TYPE_BOOL",  "string": "DX_TYPE_STRING"}
 
     for item in variables_block:
         var = variables_block.get(item)
-        binding = var.get('binding')
+        # binding = var.get('binding')
 
         name = var.get('name')
 
         properties = var.get('properties')
-        template_keys = var.get('variable_template')
+        variable_template = var.get('variable_template')
 
-        for template_key_tuple in template_keys:
+        template_key = variable_template.get('declare')
+        binding = variable_template.get('binding')
 
-            template_key = template_key_tuple[0]
-            binding = template_key_tuple[1]
+        var_list = binding_variables.get(binding, [])
+        var_list.append(name)
+        binding_variables.update({binding: var_list})
 
-            var_list = binding_variables.get(binding, [])
-            var_list.append(name)
-            binding_variables.update({binding: var_list})
+        pin = get_value(properties, 'pin', 'GX_PIN_NOT_DECLARED_IN_GENX_MODEL')
+        initialState = get_value(properties, 'initialState', 'GPIO_Value_Low')
+        invert = "true" if get_value(properties, 'invertPin', True) else "false"
 
-            pin = get_value(properties, 'pin',
-                            'GX_PIN_NOT_DECLARED_IN_GENX_MODEL')
-            initialState = get_value(
-                properties, 'initialState', 'GPIO_Value_Low')
-            invert = "true" if get_value(
-                properties, 'invertPin', True) else "false"
+        twin_type = get_value(properties, 'type', None)
+        twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
 
-            twin_type = get_value(properties, 'type', None)
-            twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
+        detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
+        period = get_value(properties, 'period', '{ 0, 0 }')
 
-            detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
-            period = get_value(properties, 'period', '{ 0, 0 }')
+        if template_key is None or templates.get(template_key) is None:
+            print('Key: "{template_key}" not found'.format(
+                template_key=template_key))
+            continue
+        else:
+            f.write(templates[template_key].format(
+                name=name, 
+                pin=pin,
+                initialState=initialState,
+                invert=invert,
+                detect=detect,
+                twin_type=twin_type,
+                period=period
+            ))
 
-            if template_key is None or templates.get(template_key) is None:
-                print('Key: "{template_key}" not found'.format(
-                    template_key=template_key))
-                continue
-            else:
-                f.write(templates[template_key].format(
-                    name=name, pin=pin,
-                    initialState=initialState,
-                    invert=invert,
-                    detect=detect,
-                    twin_type=twin_type,
-                    period=period
-                ))
-
-            if properties is not None and properties.get('type', '').lower() == 'oneshot' and properties.get('autostart', False) == True:
-                autostart_oneshot_timer_list.append(name)
+        if properties is not None and properties.get('type', '').lower() == 'oneshot' and properties.get('autostart', False) == True:
+            autostart_oneshot_timer_list.append(name)
 
 
 def does_handler_exist(code_lines, handler):
@@ -181,10 +182,14 @@ def render_handler_block():
     for item in handlers_block:
         var = handlers_block.get(item)
         binding = var.get('binding')
+        type = None
 
         # if binding is not None and binding == key_binding:
 
         name = var.get('name')
+        properties = var.get('properties')
+        if properties is not None:
+            type = properties.get('type')
 
         if does_handler_exist(code_lines=code_lines, handler=name):
             continue
@@ -197,7 +202,7 @@ def render_handler_block():
         else:
             try:
                 block_chars = templates.get(template_key).format(name=name, device_twins_updates=device_twins_updates,
-                                                                 device_twin_variables=device_twin_variables)
+                                                                 device_twin_variables=device_twin_variables, type=type)
             except:
                 print('ERROR: Problem formatting template "{template_key}". Check regular brackets in the template are escaped as {{{{.'.format(
                     template_key=template_key))
@@ -210,7 +215,7 @@ def render_handler_block():
             '/// GENX_BEGIN ID:{name} MD5:{hash}\n'.format(name=name, hash=hash_object.hexdigest()))
 
         code_lines.append(templates[template_key].format(name=name, device_twins_updates=device_twins_updates,
-                                                         device_twin_variables=device_twin_variables))
+                                                         device_twin_variables=device_twin_variables, type=type))
         code_lines.append('\n/// GENX_END ID:{name}'.format(name=name))
         code_lines.append("\n\n")
 

@@ -12,8 +12,8 @@
     "AllowedConnections": [
       "REPLACE_WITH_REQUIRED_ENDPOINTS"
     ],
-    "SystemEventNotifications": false,
-    "SoftwareUpdateDeferral": false,
+    "SystemEventNotifications": true,
+    "SoftwareUpdateDeferral": true,
     "PowerControls": []
   },
   "ApplicationType": "Default",

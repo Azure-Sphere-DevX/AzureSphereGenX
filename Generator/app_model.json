@@ -14,7 +14,9 @@
               "DeviceAuthentication": "REPLACE_WITH_YOUR_TENANT_ID"
             },
             {
-              "AllowedConnections": [ "REPLACE_WITH_REQUIRED_ENDPOINTS"]
+              "AllowedConnections": [
+                "REPLACE_WITH_REQUIRED_ENDPOINTS"
+              ]
             },
             {
               "SystemEventNotifications": false
@@ -124,7 +126,87 @@
         }
       }
     ],
+    "classes": [
+      {
+        "name": "SetDesiredPressure",
+        "class": "AzureDeviceTwinPnP",
+        "enabled": false,
+        "properties": {
+          "type": "float"
+        }
+      },
+      {
+        "name": "SetDesiredTemperature",
+        "class": "AzureDeviceTwinPnP",
+        "enabled": false,
+        "properties": {
+          "type": "bool"
+        }
+      },
+      {
+        "name": "LightControl",
+        "class": "DirectMethod",
+        "enabled": false
+      },
+      {
+        "name": "Light",
+        "class": "GpioOutput",
+        "enabled": false,
+        "properties": {
+          "pin": "NETWORK_CONNECTED_LED",
+          "initialState": "GPIO_Value_Low",
+          "invertPin": false,
+          "period": "{ 5, 0 }"
+        }
+      },
+      {
+        "name": "ButtonA",
+        "class": "GpioInput",
+        "enabled": false,
+        "properties": {
+          "pin": "BUTTON_A",
+          "detect": "DX_GPIO_DETECT_LOW",
+          "period": "{ 0, 200000000 }"
+        }
+      },
+      {
+        "name": "FanOn",
+        "class": "DirectMethod",
+        "enabled": false
+      },
+      {
+        "name": "FanOff",
+        "class": "DirectMethod",
+        "enabled": false
+      },
+      {
+        "name": "MeasureTemperature",
+        "class": "TimerPeriodic",
+        "enabled": false,
+        "properties": {
+          "period": "{ 5, 0 }",
+          "type": "periodic"
+        }
+      },
+      {
+        "name": "Watchdog",
+        "description": "Watchdog on a 30 second refresh cadence",
+        "enabled": false,
+        "class": "Watchdog"
+      },
+      {
+        "name": "DeferredUpdate",
+        "description": "Deferred update framework and a device twin to report status",
+        "warning": "The app_manifest.json file is updated with the following capabilities: SystemEventNotifications and SoftwareUpdateDeferral",
+        "enabled": true,
+        "class": "DeferredUpdate"
+      }
+    ],
     "custom": [
+      {
+        "name": "DeviceTwinCloudToDevice",
+        "enabled": false
+      },
       {
         "name": "DeferredUpdate",
         "description": "Deferred update framework and a device twin to report status",

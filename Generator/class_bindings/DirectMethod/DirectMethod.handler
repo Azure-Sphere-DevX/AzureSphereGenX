@@ -1,0 +1,10 @@
+/// <summary>
+/// What is the purpose of this direct method
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE {name}_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {{
+   
+    // Example direct method with no payload
+    // Implement your logic here
+
+    return DX_METHOD_SUCCEEDED;
+}}

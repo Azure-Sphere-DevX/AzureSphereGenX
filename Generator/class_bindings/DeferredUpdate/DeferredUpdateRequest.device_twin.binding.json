@@ -1,0 +1,10 @@
+{
+  "name": "DeferredUpdateRequest",
+  "properties": {
+    "type": "string"
+  },
+  "variable_template": {
+    "binding": "DEVICE_TWIN_BINDING",
+    "declare": "declare_device_twin"
+  }
+}

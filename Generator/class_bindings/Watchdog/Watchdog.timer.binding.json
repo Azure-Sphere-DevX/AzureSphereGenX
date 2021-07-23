@@ -1,0 +1,9 @@
+{
+    "properties": {
+        "period": "{ 30, 0 }"
+    },
+    "variable_template": {
+        "binding": "TIMER_BINDING",
+        "declare": "declare_timer_periodic"
+    }
+}

@@ -29,15 +29,19 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type, SysEvent_Status status, const char* typeDescription, const char* statusDescription);
+static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type, SysEvent_Status status, const char* typeDescription, const char* statusDescription);
 
 
 /****************************************************************************************
 * Binding declarations
 ****************************************************************************************/
+static DX_DEVICE_TWIN_BINDING dt_DeferredUpdateNotification = { .twinProperty = "DeferredUpdateNotification", .twinType = DX_TYPE_STRING };
+static DX_DEVICE_TWIN_BINDING dt_DeferredUpdateRequest = { .twinProperty = "DeferredUpdateRequest", .twinType = DX_TYPE_STRING };
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DeferredUpdateNotification, &dt_DeferredUpdateRequest };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
 static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
