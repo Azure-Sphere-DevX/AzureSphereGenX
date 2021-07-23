@@ -96,6 +96,45 @@ int main(int argc, char* argv[]) {{
 // Main code blocks
 
 
+/// GENX_BEGIN ID:ButtonA MD5:f4ad977d757748a39b8bc73a4aec9001
+/// <summary>
+/// Implement your GPIO input timer function
+/// </summary>
+static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer) {
+    static GPIO_Value_Type gpio_ButtonANewState;
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    if (dx_gpioStateGet(&gpio_ButtonA, &gpio_ButtonANewState)) {
+        Log_Debug("gpio_ButtonA: %d\n", gpio_ButtonANewState);
+    }
+}
+/// GENX_END ID:ButtonA
+
+
+/// GENX_BEGIN ID:MeasureTemperature MD5:862427771aefa4848defddee55ea5b35
+/// <summary>
+/// Implement your oneshot timer function
+/// </summary>
+static void MeasureTemperature_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    Log_Debug("Oneshot timer MeasureTemperature_handler called\n");
+    // Implement your timer function
+
+
+    // reload the oneshot timer
+    dx_timerOneShotSet(&tmr_MeasureTemperature, &(struct timespec){5, 0});
+}
+/// GENX_END ID:MeasureTemperature
+
+
 /// GENX_BEGIN ID:DeferredUpdate MD5:1228ab408e101ae072880291ce561421
 /// <summary>
 /// Determine whether or not to defer an update

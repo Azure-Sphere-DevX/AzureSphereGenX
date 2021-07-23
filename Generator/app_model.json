@@ -162,7 +162,7 @@
       {
         "name": "ButtonA",
         "class": "GpioInput",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "BUTTON_A",
           "detect": "DX_GPIO_DETECT_LOW",
@@ -181,8 +181,8 @@
       },
       {
         "name": "MeasureTemperature",
-        "class": "TimerPeriodic",
-        "enabled": false,
+        "class": "TimerOneshot",
+        "enabled": true,
         "properties": {
           "period": "{ 5, 0 }",
           "type": "periodic"

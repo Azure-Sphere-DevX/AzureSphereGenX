@@ -31,27 +31,32 @@ static char Log_Debug_buffer[128];
  ****************************************************************************************/
 static uint32_t DeferredUpdateCalculate_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type, SysEvent_Status status, const char* typeDescription, const char* statusDescription);
 static void DeferredUpdateNotification_gx_handler(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type, SysEvent_Status status, const char* typeDescription, const char* statusDescription);
+static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer);
+static void MeasureTemperature_gx_handler(EventLoopTimer *eventLoopTimer);
 
 
 /****************************************************************************************
 * Binding declarations
 ****************************************************************************************/
+static DX_GPIO_BINDING gpio_ButtonA = { .pin = BUTTON_A, .name = "ButtonA", .direction = DX_INPUT, .detect = DX_GPIO_DETECT_LOW };
+static DX_TIMER_BINDING tmr_ButtonA = { .period = { 0, 200000000 }, .name = "ButtonA", .handler = ButtonA_gx_handler };
+static DX_TIMER_BINDING tmr_MeasureTemperature = { .name = "MeasureTemperature", .handler = MeasureTemperature_gx_handler };
 static DX_DEVICE_TWIN_BINDING dt_DeferredUpdateNotification = { .twinProperty = "DeferredUpdateNotification", .twinType = DX_TYPE_STRING };
 static DX_DEVICE_TWIN_BINDING dt_DeferredUpdateRequest = { .twinProperty = "DeferredUpdateRequest", .twinType = DX_TYPE_STRING };
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DeferredUpdateNotification, &dt_DeferredUpdateRequest };
+static DX_DEVICE_TWIN_BINDING* device_twin_binding_set[] = { &dt_DeferredUpdateNotification, &dt_DeferredUpdateRequest };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
-static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  };
+static DX_DIRECT_METHOD_BINDING *direct_method_binding_set[] = {  };
 
 // All GPIOs referenced in gpio_bindings with be opened in the gx_initPeripheralAndHandlers function
-static DX_GPIO_BINDING *gpio_bindings[] = {  };
+static DX_GPIO_BINDING *gpio_binding_set[] = { &gpio_ButtonA };
 
 // All timers referenced in timer_bindings will be opened in the gx_initPeripheralAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = {  };
+static DX_TIMER_BINDING *timer_binding_set[] = { &tmr_ButtonA, &tmr_MeasureTemperature };
 
 // All timers referenced in timer_bindings_oneshot will be started in the gx_initPeripheralAndHandlers function
 static DX_TIMER_BINDING *timer_bindings_oneshot[] = {  };
@@ -67,25 +72,25 @@ static void gx_initPeripheralAndHandlers(void)
 #ifdef GX_AZURE_IOT
     dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
 #else
-    if (NELEMS(device_twin_bindings) > 0 || NELEMS(direct_method_bindings) > 0) {
+    if (NELEMS(device_twin_binding_set) > 0 || NELEMS(direct_method_binding_set) > 0) {
         dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
     }
 #endif // GX_AZURE_IOT
 
-    if (NELEMS(gpio_bindings) > 0) {
-        dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));
+    if (NELEMS(gpio_binding_set) > 0) {
+        dx_gpioSetOpen(gpio_binding_set, NELEMS(gpio_binding_set));
     }
 
-    if (NELEMS(device_twin_bindings) > 0) {
-        dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));
+    if (NELEMS(device_twin_binding_set) > 0) {
+        dx_deviceTwinSubscribe(device_twin_binding_set, NELEMS(device_twin_binding_set));
     }
 
-    if (NELEMS(direct_method_bindings) > 0 ) {
-        dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));
+    if (NELEMS(direct_method_binding_set) > 0 ) {
+        dx_directMethodSubscribe(direct_method_binding_set, NELEMS(direct_method_binding_set));
     }
 
-    if (NELEMS(timer_bindings) > 0) {
-        dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));
+    if (NELEMS(timer_binding_set) > 0) {
+        dx_timerSetStart(timer_binding_set, NELEMS(timer_binding_set));
     }
     
     if (NELEMS(timer_bindings_oneshot) > 0) {
@@ -102,12 +107,12 @@ static void gx_initPeripheralAndHandlers(void)
 }
 
 static void gx_closePeripheralAndHandlers(void){
-    if (NELEMS(timer_bindings) > 0) {
-	    dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));
+    if (NELEMS(timer_binding_set) > 0) {
+	    dx_timerSetStop(timer_binding_set, NELEMS(timer_binding_set));
     }
 
-    if (NELEMS(gpio_bindings) > 0) {
-        dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));
+    if (NELEMS(gpio_binding_set) > 0) {
+        dx_gpioSetClose(gpio_binding_set, NELEMS(gpio_binding_set));
     }
 
 	dx_deviceTwinUnsubscribe();
