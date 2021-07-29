@@ -4,7 +4,7 @@
       "name": "SetDesiredPressure",
       "description":"Azure IoT device twin cloud to device",
       "class": "DeviceTwinPnP",
-      "enabled": true,
+      "enabled": false,
       "properties": {
         "type": "float"
       }
@@ -13,7 +13,7 @@
       "name": "SetPressure",
       "description":"Avnet IoT Connect device twin cloud to device",
       "class": "DeviceTwinAvnet",
-      "enabled": true,
+      "enabled": false,
       "properties": {
         "type": "float"
       }
@@ -29,12 +29,12 @@
     {
       "name": "LightControl",
       "class": "DirectMethod",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "Light",
       "class": "GpioOutput",
-      "enabled": true,
+      "enabled": false,
       "properties": {
         "pin": "NETWORK_CONNECTED_LED",
         "initialState": "GPIO_Value_Low",
@@ -45,7 +45,7 @@
     {
       "name": "ButtonA",
       "class": "GpioInput",
-      "enabled": true,
+      "enabled": false,
       "properties": {
         "pin": "BUTTON_A",
         "detect": "DX_GPIO_DETECT_LOW",
@@ -55,17 +55,17 @@
     {
       "name": "FanOn",
       "class": "DirectMethod",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "FanOff",
       "class": "DirectMethod",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "MeasureTemperature",
       "class": "TimerOneshot",
-      "enabled": true,
+      "enabled": false,
       "properties": {
         "period": "{ 5, 0 }",
         "type": "periodic"
@@ -74,21 +74,21 @@
     {
       "name": "Watchdog",
       "description": "Watchdog on a 30 second refresh cadence",
-      "enabled": true,
+      "enabled": false,
       "class": "Watchdog"
     },
     {
       "name": "DeferredUpdate",
       "description": "Deferred update framework and a device twin to report status",
       "warning": "The app_manifest.json file is updated with the following capabilities: SystemEventNotifications and SoftwareUpdateDeferral",
-      "enabled": true,
+      "enabled": false,
       "class": "DeferredUpdate"
     }
   ],
   "azure_iot": [
     {
       "name": "glovebox-demo",
-      "enabled": true,
+      "enabled": false,
       "manifest": {
         "CmdArgs": [
           "--ScopeID",
