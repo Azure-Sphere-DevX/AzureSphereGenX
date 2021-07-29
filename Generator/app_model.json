@@ -10,7 +10,7 @@
       }
     },
     {
-      "name": "SetPressure",
+      "name": "SetDesiredPressure",
       "description":"Avnet IoT Connect device twin cloud to device",
       "class": "DeviceTwinAvnet",
       "enabled": false,
