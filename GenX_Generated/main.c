@@ -96,6 +96,115 @@ int main(int argc, char* argv[]) {{
 // Main code blocks
 
 
+/// GENX_BEGIN ID:SetPressurePnP MD5:48f1479701a6c7fb663e01a3f8c6441e
+/// <summary>
+/// What is the purpose of this device twin handler function?
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void SetPressurePnP_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
+{
+	bool result = false;
+
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    void *value = deviceTwinBinding->twinState;
+
+	// The following is to cover all types from the generator
+
+	switch (deviceTwinBinding->twinType) {
+	case DX_TYPE_BOOL:
+		result = *(bool*)value;
+		Log_Debug("Device twin value: %d\n", *(bool*)value ? "True" : "False");
+		break;
+	case DX_TYPE_INT:
+		result = *(int*)value > 0 && *(int*)value < 100;
+		Log_Debug("Device twin value: %d\n", *(int*)value);
+		break;
+	case DX_TYPE_FLOAT:
+		result = *(float*)value > 0.0f && *(float*)value < 100.0f;
+		Log_Debug("Device twin value: %f\n", *(float*)value);
+		break;
+	case DX_TYPE_DOUBLE:
+		result = *(double*)value > 0.0 && *(double*)value < 100.0;
+		Log_Debug("Device twin value: %f\n", *(double*)value);
+		break;
+	case DX_TYPE_STRING:
+		result = !dx_isStringNullOrEmpty((char*)value);
+		Log_Debug("Device twin value: %s\n", (char*)value);
+		break;
+	default:
+		break;
+	}
+
+    if (result) {
+
+        // IMPLEMENT YOUR CODE HERE
+
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+/// GENX_END ID:SetPressurePnP
+
+
+/// GENX_BEGIN ID:SetPressure MD5:6d7e617fec44d5a2980c61129b6bf7fb
+/// <summary>
+/// What is the purpose of this device twin handler function?
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void SetPressure_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
+{
+	bool result = false;
+
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    void *value = deviceTwinBinding->twinState;
+
+	// The following is to cover all types from the generator
+
+	switch (deviceTwinBinding->twinType) {
+	case DX_TYPE_BOOL:
+		result = *(bool*)value;
+		Log_Debug("Device twin value: %d\n", *(bool*)value ? "True" : "False");
+		break;
+	case DX_TYPE_INT:
+		result = *(int*)value > 0 && *(int*)value < 100;
+		Log_Debug("Device twin value: %d\n", *(int*)value);
+		break;
+	case DX_TYPE_FLOAT:
+		result = *(float*)value > 0.0f && *(float*)value < 100.0f;
+		Log_Debug("Device twin value: %f\n", *(float*)value);
+		break;
+	case DX_TYPE_DOUBLE:
+		result = *(double*)value > 0.0 && *(double*)value < 100.0;
+		Log_Debug("Device twin value: %f\n", *(double*)value);
+		break;
+	case DX_TYPE_STRING:
+		result = !dx_isStringNullOrEmpty((char*)value);
+		Log_Debug("Device twin value: %s\n", (char*)value);
+		break;
+	default:
+		break;
+	}
+
+    if (result) {
+
+        // IMPLEMENT YOUR CODE HERE
+
+    }
+}
+/// GENX_END ID:SetPressure
+
+
 /// GENX_BEGIN ID:ButtonA MD5:f4ad977d757748a39b8bc73a4aec9001
 /// <summary>
 /// Implement your GPIO input timer function
@@ -113,6 +222,20 @@ static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer) {
     }
 }
 /// GENX_END ID:ButtonA
+
+
+/// GENX_BEGIN ID:FanOn MD5:dd557f8700192da87bcb5304d21770eb
+/// <summary>
+/// What is the purpose of this direct method
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE FanOn_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+   
+    // Example direct method with no payload
+    // Implement your logic here
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:FanOn
 
 
 /// GENX_BEGIN ID:MeasureTemperature MD5:862427771aefa4848defddee55ea5b35

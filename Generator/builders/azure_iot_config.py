@@ -4,8 +4,7 @@ import json
 class Builder():
     def __init__(self, data, manifest_updates):
 
-        self.bindings = list(elem for elem in data.get('bindings').get(
-            'azure_iot') if elem.get('enabled', True) == True)
+        self.bindings = list(elem for elem in data.get('azure_iot') if elem.get('enabled', True) == True)
 
         self.manifest_updates = manifest_updates
 

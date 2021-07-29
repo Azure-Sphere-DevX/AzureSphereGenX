@@ -5,8 +5,7 @@ import json
 class Builder():
     def __init__(self, data, templates, signatures_block, timer_block, variables_block, handlers_block, includes_block):
 
-        self.bindings = list(elem for elem in data.get('bindings').get(
-            'classes') if elem.get('enabled', True) == True)
+        self.bindings = list(elem for elem in data.get('components') if elem.get('enabled', True) == True)
 
         self.templates = templates
         self.signatures_block = signatures_block

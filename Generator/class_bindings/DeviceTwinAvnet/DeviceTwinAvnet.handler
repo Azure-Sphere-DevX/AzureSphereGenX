@@ -1,0 +1,49 @@
+/// <summary>
+/// What is the purpose of this device twin handler function?
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void {name}_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
+{{
+	bool result = false;
+
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    void *value = deviceTwinBinding->twinState;
+
+	// The following is to cover all types from the generator
+
+	switch (deviceTwinBinding->twinType) {{
+	case DX_TYPE_BOOL:
+		result = *(bool*)value;
+		Log_Debug("Device twin value: %d\n", *(bool*)value ? "True" : "False");
+		break;
+	case DX_TYPE_INT:
+		result = *(int*)value > 0 && *(int*)value < 100;
+		Log_Debug("Device twin value: %d\n", *(int*)value);
+		break;
+	case DX_TYPE_FLOAT:
+		result = *(float*)value > 0.0f && *(float*)value < 100.0f;
+		Log_Debug("Device twin value: %f\n", *(float*)value);
+		break;
+	case DX_TYPE_DOUBLE:
+		result = *(double*)value > 0.0 && *(double*)value < 100.0;
+		Log_Debug("Device twin value: %f\n", *(double*)value);
+		break;
+	case DX_TYPE_STRING:
+		result = !dx_isStringNullOrEmpty((char*)value);
+		Log_Debug("Device twin value: %s\n", (char*)value);
+		break;
+	default:
+		break;
+	}}
+
+    if (result) {{
+
+        // IMPLEMENT YOUR CODE HERE
+
+    }}
+}}

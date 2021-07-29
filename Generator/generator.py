@@ -6,12 +6,6 @@ import hashlib
 import cleaner
 import os
 
-from builders import device_twin
-from builders import direct_methods
-from builders import timer_bindings
-from builders import gpio_in_bindings
-from builders import gpio_out_bindings
-from builders import custom_bindings
 from builders import azure_iot_config
 from builders import class_bindings
 
@@ -56,40 +50,17 @@ def load_bindings():
     with open('app_model.json', 'r') as j:
         data = json.load(j)
 
-    dt = device_twin.Builder(data, signatures=signatures_block,
-                             variables_block=variables_block, handlers_block=handlers_block)
-    dm = direct_methods.Builder(data, signatures=signatures_block,
-                                variables_block=variables_block, handlers_block=handlers_block)
-    timers = timer_bindings.Builder(data, signatures=signatures_block,
-                                    variables_block=variables_block, handlers_block=handlers_block, timer_block=timer_block)
-    gpio_input = gpio_in_bindings.Builder(data, signatures=signatures_block, variables_block=variables_block,
-                                          handlers_block=handlers_block, timer_block=timer_block)
-    gpio_output = gpio_out_bindings.Builder(data, signatures=signatures_block, variables_block=variables_block,
-                                            handlers_block=handlers_block, timer_block=timer_block)
-
-    custom = custom_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
-                                     handlers_block=handlers_block, includes_block=includes_block)
-
     classes = class_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
                                      handlers_block=handlers_block, includes_block=includes_block)
 
     azure_iot = azure_iot_config.Builder(
         data, manifest_updates=manifest_updates)
 
-    dt.build()
-    dm.build()
-    timers.build()
-    gpio_input.build()
-    gpio_output.build()
-
     with open(generated_project_path + "/app_manifest.json", "r") as f:
         manifest = json.load(f)
 
     manifest_updates = azure_iot.build(manifest)
-    manifest_updates = custom.build(manifest_updates)
     manifest_updates = classes.build(manifest_updates)
-
-    # builders = [dt, dm, timers, gpio_input, gpio_output, custom]
 
 
 def get_value(properties, key, default):
@@ -126,7 +97,6 @@ def render_variable_block(f):
 
     for item in variables_block:
         var = variables_block.get(item)
-        # binding = var.get('binding')
 
         name = var.get('name')
 
@@ -289,7 +259,7 @@ def write_main():
         df.write(templates["declarations"])
 
         render_signatures(df)
-        device_twins_updates, device_twin_variables = dt.build_publish_device_twins()
+        # device_twins_updates, device_twin_variables = dt.build_publish_device_twins()
 
         df.write("\n")
         write_comment_block(df, 'Binding declarations')
