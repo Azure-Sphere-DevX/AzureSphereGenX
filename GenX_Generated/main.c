@@ -96,12 +96,12 @@ int main(int argc, char* argv[]) {{
 // Main code blocks
 
 
-/// GENX_BEGIN ID:SetPressurePnP MD5:48f1479701a6c7fb663e01a3f8c6441e
+/// GENX_BEGIN ID:SetDesiredPressure MD5:0f8a00a047f42fe4d548236695a75157
 /// <summary>
 /// What is the purpose of this device twin handler function?
 /// </summary>
 /// <param name="deviceTwinBinding"></param>
-static void SetPressurePnP_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
+static void SetDesiredPressure_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
 {
 	bool result = false;
 
@@ -149,7 +149,7 @@ static void SetPressurePnP_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding)
         dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
     }
 }
-/// GENX_END ID:SetPressurePnP
+/// GENX_END ID:SetDesiredPressure
 
 
 /// GENX_BEGIN ID:SetPressure MD5:6d7e617fec44d5a2980c61129b6bf7fb
@@ -205,6 +205,20 @@ static void SetPressure_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding)
 /// GENX_END ID:SetPressure
 
 
+/// GENX_BEGIN ID:LightControl MD5:2c85a1e25cbb1dea11acfad8035dd0a8
+/// <summary>
+/// What is the purpose of this direct method
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE LightControl_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+   
+    // Example direct method with no payload
+    // Implement your logic here
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:LightControl
+
+
 /// GENX_BEGIN ID:ButtonA MD5:f4ad977d757748a39b8bc73a4aec9001
 /// <summary>
 /// Implement your GPIO input timer function
@@ -238,6 +252,20 @@ static DX_DIRECT_METHOD_RESPONSE_CODE FanOn_gx_handler(JSON_Value *json, DX_DIRE
 /// GENX_END ID:FanOn
 
 
+/// GENX_BEGIN ID:FanOff MD5:c84830bce3283bb329ae4665fa0f45d9
+/// <summary>
+/// What is the purpose of this direct method
+/// </summary>
+static DX_DIRECT_METHOD_RESPONSE_CODE FanOff_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+   
+    // Example direct method with no payload
+    // Implement your logic here
+
+    return DX_METHOD_SUCCEEDED;
+}
+/// GENX_END ID:FanOff
+
+
 /// GENX_BEGIN ID:MeasureTemperature MD5:862427771aefa4848defddee55ea5b35
 /// <summary>
 /// Implement your oneshot timer function
@@ -256,6 +284,38 @@ static void MeasureTemperature_gx_handler(EventLoopTimer *eventLoopTimer) {
     dx_timerOneShotSet(&tmr_MeasureTemperature, &(struct timespec){5, 0});
 }
 /// GENX_END ID:MeasureTemperature
+
+
+/// GENX_BEGIN ID:Watchdog MD5:4f6bc7d013dfa4e93826c0b945f7a4a1
+/// <summary>
+/// This timer extends the app level lease watchdog timer
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void Watchdog_gx_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+    timer_settime(watchdogTimer, 0, &watchdogInterval, NULL);
+}
+
+/// <summary>
+/// Set up watchdog timer - the lease is extended via the Watchdog_handler function
+/// </summary>
+/// <param name=""></param>
+void StartWatchdog(void) {
+	struct sigevent alarmEvent;
+	alarmEvent.sigev_notify = SIGEV_SIGNAL;
+	alarmEvent.sigev_signo = SIGALRM;
+	alarmEvent.sigev_value.sival_ptr = &watchdogTimer;
+
+	if (timer_create(CLOCK_MONOTONIC, &alarmEvent, &watchdogTimer) == 0) {
+		if (timer_settime(watchdogTimer, 0, &watchdogInterval, NULL) == -1) {
+			Log_Debug("Issue setting watchdog timer. %s %d\n", strerror(errno), errno);
+		}
+	}
+}
+/// GENX_END ID:Watchdog
 
 
 /// GENX_BEGIN ID:DeferredUpdate MD5:1228ab408e101ae072880291ce561421

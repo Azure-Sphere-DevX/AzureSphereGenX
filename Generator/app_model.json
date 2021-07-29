@@ -1,7 +1,7 @@
 {  
   "components": [
     {
-      "name": "SetPressurePnP",
+      "name": "SetDesiredPressure",
       "description":"Azure IoT device twin cloud to device",
       "class": "DeviceTwinPnP",
       "enabled": true,
@@ -29,12 +29,12 @@
     {
       "name": "LightControl",
       "class": "DirectMethod",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "Light",
       "class": "GpioOutput",
-      "enabled": false,
+      "enabled": true,
       "properties": {
         "pin": "NETWORK_CONNECTED_LED",
         "initialState": "GPIO_Value_Low",
@@ -60,7 +60,7 @@
     {
       "name": "FanOff",
       "class": "DirectMethod",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "MeasureTemperature",
@@ -74,7 +74,7 @@
     {
       "name": "Watchdog",
       "description": "Watchdog on a 30 second refresh cadence",
-      "enabled": false,
+      "enabled": true,
       "class": "Watchdog"
     },
     {
@@ -88,7 +88,7 @@
   "azure_iot": [
     {
       "name": "glovebox-demo",
-      "enabled": false,
+      "enabled": true,
       "manifest": {
         "CmdArgs": [
           "--ScopeID",

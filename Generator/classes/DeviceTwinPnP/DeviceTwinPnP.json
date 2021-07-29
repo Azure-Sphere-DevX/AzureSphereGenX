@@ -1,0 +1,5 @@
+{
+    "signature_template": {
+        "declare": "sig_device_twin"
+    }
+}

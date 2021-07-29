@@ -27,12 +27,12 @@ class Builder():
                 dict3[key] = [value, dict1[key]]
         return dict3
 
-    def load_class_bindings(self):
-        path = 'class_bindings'
+    def load_classes(self):
+        path = 'classes'
 
-        class_bindings = os.listdir(path)
+        classes = os.listdir(path)
 
-        for key in class_bindings:
+        for key in classes:
 
             binding_path = path + "/" + key
             components = os.listdir(binding_path)
@@ -44,7 +44,7 @@ class Builder():
 
             self.components_dict.update({key: component_list})
 
-    def list_class_bindings(self):
+    def list_classes(self):
         print(self.components_dict)
 
     def list_custom_binding_components(self):
@@ -178,7 +178,7 @@ class Builder():
 
         for component in component_list:
 
-            component_filename = 'class_bindings/' + class_key + '/' + component
+            component_filename = 'classes/' + class_key + '/' + component
             component_lower = component.lower()
 
             if '.binding' in component_lower:
@@ -194,7 +194,7 @@ class Builder():
 
     def build(self, manifest):
         self.manifest = manifest
-        self.load_class_bindings()
+        self.load_classes()
         for binding in self.bindings:
             self.get_custom_binding(binding, binding.get('class'))
 
