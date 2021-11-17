@@ -14,7 +14,7 @@ components:
     enabled: false
     properties:
       property_name: TargetTemperature
-      type: bool
+      type: int
 
   - component: Declare a GPIO Output binding for a fan
     class: GpioOutput
