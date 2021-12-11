@@ -4,7 +4,7 @@
       "name": "SetDesiredPressure",
       "description":"Azure IoT device twin cloud to device",
       "class": "DeviceTwinPnP",
-      "enabled": false,
+      "enabled": true,
       "properties": {
         "type": "float"
       }

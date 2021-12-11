@@ -1,6 +1,0 @@
-{
-    "variable_template": {
-        "binding": "DIRECT_METHOD_BINDING",
-        "declare": "declare_direct_method"
-    }
-}

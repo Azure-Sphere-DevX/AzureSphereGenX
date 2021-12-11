@@ -1,5 +1,6 @@
 import os
 import json
+import yaml
 
 
 class Builder():
@@ -57,7 +58,8 @@ class Builder():
 
         if os.path.exists(component_filename):
             with open(component_filename, 'r') as f:
-                properties = json.load(f)
+                # properties = json.load(f)
+                properties = yaml.load(f, Loader=yaml.FullLoader)
         else:
             properties = {}
 

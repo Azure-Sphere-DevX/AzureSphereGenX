@@ -1,0 +1,4 @@
+---
+variable_template:
+  binding: TIMER_BINDING
+  declare: declare_timer_oneshot

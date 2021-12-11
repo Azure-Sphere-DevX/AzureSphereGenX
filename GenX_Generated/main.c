@@ -95,3 +95,93 @@ int main(int argc, char* argv[]) {{
 
 // Main code blocks
 
+
+/// GENX_BEGIN ID:SetDesiredPressure MD5:0f8a00a047f42fe4d548236695a75157
+/// <summary>
+/// What is the purpose of this device twin handler function?
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void SetDesiredPressure_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
+{
+	bool result = false;
+
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    void *value = deviceTwinBinding->twinState;
+
+	// The following is to cover all types from the generator
+
+	switch (deviceTwinBinding->twinType) {
+	case DX_TYPE_BOOL:
+		result = *(bool*)value;
+		Log_Debug("Device twin value: %d\n", *(bool*)value ? "True" : "False");
+		break;
+	case DX_TYPE_INT:
+		result = *(int*)value > 0 && *(int*)value < 100;
+		Log_Debug("Device twin value: %d\n", *(int*)value);
+		break;
+	case DX_TYPE_FLOAT:
+		result = *(float*)value > 0.0f && *(float*)value < 100.0f;
+		Log_Debug("Device twin value: %f\n", *(float*)value);
+		break;
+	case DX_TYPE_DOUBLE:
+		result = *(double*)value > 0.0 && *(double*)value < 100.0;
+		Log_Debug("Device twin value: %f\n", *(double*)value);
+		break;
+	case DX_TYPE_STRING:
+		result = !dx_isStringNullOrEmpty((char*)value);
+		Log_Debug("Device twin value: %s\n", (char*)value);
+		break;
+	default:
+		break;
+	}
+
+    if (result) {
+
+        // IMPLEMENT YOUR CODE HERE
+
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+/// GENX_END ID:SetDesiredPressure
+
+
+/// GENX_BEGIN ID:ButtonA MD5:f4ad977d757748a39b8bc73a4aec9001
+/// <summary>
+/// Implement your GPIO input timer function
+/// </summary>
+static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer) {
+    static GPIO_Value_Type gpio_ButtonANewState;
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    if (dx_gpioStateGet(&gpio_ButtonA, &gpio_ButtonANewState)) {
+        Log_Debug("gpio_ButtonA: %d\n", gpio_ButtonANewState);
+    }
+}
+/// GENX_END ID:ButtonA
+
+
+/// GENX_BEGIN ID:MeasureTemperature MD5:a9d9eda494110a8cc6eb9ab4004226df
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static DX_DEFINE_TIMER_HANDLER(MeasureTemperature_gx_handler)
+{
+    Log_Debug("Periodic timer MeasureTemperature_handler called\n");
+
+    // Implement your timer function
+    
+}
+DX_END_TIMER_HANDLER
+/// GENX_END ID:MeasureTemperature
+

@@ -29,25 +29,32 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static void SetDesiredPressure_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
+static DX_DECLARE_TIMER_HANDLER(ButtonA_gx_handler);
+static DX_DECLARE_TIMER_HANDLER(MeasureTemperature_gx_handler);
 
 
 /****************************************************************************************
 * Binding declarations
 ****************************************************************************************/
+static DX_DEVICE_TWIN_BINDING dt_SetDesiredPressure = { .twinProperty = "SetDesiredPressure", .twinType = DX_TYPE_FLOAT, .handler = SetDesiredPressure_gx_handler };
+static DX_GPIO_BINDING gpio_ButtonA = { .pin = BUTTON_A, .name = "ButtonA", .direction = DX_INPUT, .detect = DX_GPIO_DETECT_LOW };
+static DX_TIMER_BINDING tmr_ButtonA = { .period = { 0, 200 * ONE_MS }, .name = "ButtonA", .handler = ButtonA_gx_handler };
+static DX_TIMER_BINDING tmr_MeasureTemperature = { .period = { 5, 0 }, .name = "MeasureTemperature", .handler = MeasureTemperature_gx_handler };
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_binding_set[] = {  };
+static DX_DEVICE_TWIN_BINDING* device_twin_binding_set[] = { &dt_SetDesiredPressure };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
 static DX_DIRECT_METHOD_BINDING *direct_method_binding_set[] = {  };
 
 // All GPIOs referenced in gpio_bindings with be opened in the gx_initPeripheralAndHandlers function
-static DX_GPIO_BINDING *gpio_binding_set[] = {  };
+static DX_GPIO_BINDING *gpio_binding_set[] = { &gpio_ButtonA };
 
 // All timers referenced in timer_bindings will be opened in the gx_initPeripheralAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_binding_set[] = {  };
+static DX_TIMER_BINDING *timer_binding_set[] = { &tmr_ButtonA, &tmr_MeasureTemperature };
 
 // All timers referenced in timer_bindings_oneshot will be started in the gx_initPeripheralAndHandlers function
 static DX_TIMER_BINDING *timer_bindings_oneshot[] = {  };

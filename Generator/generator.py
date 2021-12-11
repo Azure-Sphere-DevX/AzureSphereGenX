@@ -5,6 +5,8 @@ import watcher
 import hashlib
 import cleaner
 import os
+import yaml
+import io
 
 from builders import azure_iot_config
 from builders import class_bindings
@@ -31,11 +33,12 @@ builders = None
 binding_variables = {}
 code_lines = []
 
-generated_project_path = '../GenX_Generated'
+# generated_project_path = '../GenX_Generated'
+generated_project_path = None
 
 
 def load_bindings():
-    global signatures_block, timer_block, variables_block, handlers_block, templates, builders, binding_variables, dt, includes_block, manifest_updates
+    global signatures_block, timer_block, variables_block, handlers_block, templates, builders, binding_variables, dt, includes_block, manifest_updates, generated_project_path
 
     signatures_block = {}
     timer_block = {}
@@ -46,9 +49,16 @@ def load_bindings():
     binding_variables = {}
     manifest_updates = {}
 
-    time.sleep(0.5)
-    with open('app_model.json', 'r') as j:
-        data = json.load(j)
+    # time.sleep(0.5)
+    # with open('app_model.json', 'r') as j:
+    #     data = json.load(j)
+
+    with open(r'app_model.yaml', 'r') as file:
+        data = yaml.load(file, Loader=yaml.FullLoader)
+        print(data)  
+        print(data["genx"]["project_path"]) 
+        generated_project_path = data["genx"]["project_path"]
+
 
     classes = class_bindings.Builder(data, templates=templates, signatures_block=signatures_block, timer_block=timer_block, variables_block=variables_block,
                                      handlers_block=handlers_block, includes_block=includes_block)
@@ -254,7 +264,7 @@ def write_main():
     if not os.path.isdir(generated_project_path + '/gx_includes'):
         os.mkdir(generated_project_path + '/gx_includes')
 
-    with open(generated_project_path + '/gx_includes/gx_declarations.h', 'w') as df:
+    with open(generated_project_path + '/main.h', 'w') as df:
 
         df.write(templates["declarations"])
 
@@ -317,7 +327,7 @@ def process_update():
 # process_update()
 
 
-watch_file = 'app_model.json'
+watch_file = 'app_model.yaml'
 
 # also call custom action function
 watcher = watcher.Watcher(watch_file, process_update)

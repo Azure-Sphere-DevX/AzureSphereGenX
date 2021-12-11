@@ -1,77 +1,87 @@
 ---
+genx:
+  project_path: "../GenX_Generated"
+
 components:
-  - component: Device to cloud device twin to report pressure
-    class: DeviceTwinD2C
-    name: dt_pressure
-    enabled: false
-    properties:
-      property_name: Pressure
-      type: float
+- name: SetDesiredPressure
+  description: Azure IoT device twin cloud to device
+  class: DeviceTwinPnP
+  enabled: true
+  properties:
+    type: float
+    
+- name: SetDesiredPressure
+  description: Avnet IoT Connect device twin cloud to device
+  class: DeviceTwinAvnet
+  enabled: false
+  properties:
+    type: float
 
-  - component: Device twin to set target temperature
-    class: DeviceTwinPnP
-    name: dt_set_target_temperature
-    enabled: false
-    properties:
-      property_name: TargetTemperature
-      type: int
+- name: SetDesiredTemperature
+  class: DeviceTwinPnP
+  enabled: false
+  properties:
+    type: bool
 
-  - component: Declare a GPIO Output binding for a fan
-    class: GpioOutput
-    name: gpio_fan
-    enabled: false
-    properties:
-      pin: FAN_PIN
-      initialState: false
-      invertPin: false
+- name: LightControl
+  class: DirectMethod
+  enabled: false
 
-  - component: Direct method to turn on fan
-    class: DirectMethod
-    name: dm_fan_on
-    enabled: false
-    properties:
-      method_name: FanOn
-      context: gpio_fan
+- name: Light
+  class: GpioOutput
+  enabled: false
+  properties:
+    pin: NETWORK_CONNECTED_LED
+    initialState: GPIO_Value_Low
+    invertPin: false
+    period: "{ 5, 0 }"
 
-  - component: Direct method to turn off fan
-    class: DirectMethod
-    name: dm_fan_off
-    enabled: false
-    properties:
-      method_name: FanOff
-      context: gpio_fan
+- name: ButtonA
+  class: GpioInput
+  enabled: true
+  properties:
+    pin: BUTTON_A
+    detect: DX_GPIO_DETECT_LOW
+    period: "{ 0, 200 * ONE_MS }"
 
-  - component: Declare timer to measure sensor
-    class: TimerPeriodic
-    name: tmr_measure_temperature
-    enabled: false
-    properties:
-      period:
-        seconds: 5
-        nanoseconds: 0
+- name: FanOn
+  class: DirectMethod
+  enabled: false
 
-  - component: Watchdog on a 30 second refresh cadence
-    class: Watchdog
-    name: watchdog
-    enabled: false
+- name: FanOff
+  class: DirectMethod
+  enabled: false
 
-  - component: Deferred update framework and a device twin to report status
-    class: DeferredUpdate
-    name: deferred_update
-    warning: "The app_manifest.json file is updated with the following capabilities: SystemEventNotifications and SoftwareUpdateDeferral"
-    enabled: false
+- name: MeasureTemperature
+  class: TimerPeriodic
+  enabled: true
+  properties:
+    period: "{ 5, 0 }"
+    type: periodic
+
+- name: Watchdog
+  description: Watchdog on a 30 second refresh cadence
+  enabled: false
+  class: Watchdog
+
+- name: DeferredUpdate
+  description: Deferred update framework and a device twin to report status
+  warning: 'The app_manifest.json file is updated with the following capabilities:
+    SystemEventNotifications and SoftwareUpdateDeferral'
+  enabled: false
+  class: DeferredUpdate
 
 azure_iot:
-  - name: demo
-    enabled: false
-    manifest:
-      CmdArgs:
-        - "--ScopeID"
-        - REPLACE_WITH_YOUR_ID_SCOPE
-      Capabilities:
-        - DeviceAuthentication: REPLACE_WITH_YOUR_TENANT_ID
-        - AllowedConnections:
-            - REPLACE_WITH_REQUIRED_ENDPOINTS
-        - SystemEventNotifications: false
-        - SoftwareUpdateDeferral: false
-        - PowerControls: []
+- name: glovebox-demo
+  enabled: false
+  manifest:
+    CmdArgs:
+    - "--ScopeID"
+    - REPLACE_WITH_YOUR_ID_SCOPE
+    Capabilities:
+    - DeviceAuthentication: REPLACE_WITH_YOUR_TENANT_ID
+    - AllowedConnections:
+      - REPLACE_WITH_REQUIRED_ENDPOINTS
+    - SystemEventNotifications: false
+    - SoftwareUpdateDeferral: false
+    - PowerControls: []

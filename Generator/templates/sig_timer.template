@@ -1,1 +1,1 @@
-static void {name}_gx_handler(EventLoopTimer *eventLoopTimer);
+static DX_DECLARE_TIMER_HANDLER({name}_gx_handler);

@@ -1,13 +1,11 @@
 /// <summary>
 /// Implement your timer function
 /// </summary>
-static void {name}_gx_handler(EventLoopTimer *eventLoopTimer) {{
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }}
-
+static DX_DEFINE_TIMER_HANDLER({name}_gx_handler)
+{{
     Log_Debug("Periodic timer {name}_handler called\n");
 
     // Implement your timer function
+    
 }}
+DX_END_TIMER_HANDLER

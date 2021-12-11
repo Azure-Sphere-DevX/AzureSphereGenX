@@ -1,0 +1,4 @@
+---
+variable_template:
+  binding: GPIO_BINDING
+  declare: declare_gpio_output
