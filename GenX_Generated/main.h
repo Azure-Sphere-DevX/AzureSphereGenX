@@ -29,32 +29,32 @@ static char Log_Debug_buffer[128];
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static void SetDesiredPressure_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-static DX_DECLARE_TIMER_HANDLER(ButtonA_gx_handler);
-static DX_DECLARE_TIMER_HANDLER(MeasureTemperature_gx_handler);
+static void PressureAlertLevel_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
+static DX_DECLARE_DIRECTMETHOD_HANDLER(OfficeLightOff_gx_handler);
+static DX_DECLARE_DIRECTMETHOD_HANDLER(OfficeLightOn_gx_handler);
 
 
 /****************************************************************************************
 * Binding declarations
 ****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_SetDesiredPressure = { .twinProperty = "SetDesiredPressure", .twinType = DX_TYPE_FLOAT, .handler = SetDesiredPressure_gx_handler };
-static DX_GPIO_BINDING gpio_ButtonA = { .pin = BUTTON_A, .name = "ButtonA", .direction = DX_INPUT, .detect = DX_GPIO_DETECT_LOW };
-static DX_TIMER_BINDING tmr_ButtonA = { .period = { 0, 200 * ONE_MS }, .name = "ButtonA", .handler = ButtonA_gx_handler };
-static DX_TIMER_BINDING tmr_MeasureTemperature = { .period = { 5, 0 }, .name = "MeasureTemperature", .handler = MeasureTemperature_gx_handler };
+static DX_DEVICE_TWIN_BINDING dt_PressureAlertLevel = { .twinProperty = "PressureAlertLevel", .twinType = DX_TYPE_FLOAT, .handler = PressureAlertLevel_gx_handler };
+static DX_GPIO_BINDING gpio_Light = { .pin = NETWORK_CONNECTED_LED, .name = "Light", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = false };
+static DX_DIRECT_METHOD_BINDING dm_OfficeLightOn = { .methodName = "OfficeLightOn", .handler = OfficeLightOn_gx_handler, .context=&gpio_Light };
+static DX_DIRECT_METHOD_BINDING dm_OfficeLightOff = { .methodName = "OfficeLightOff", .handler = OfficeLightOff_gx_handler, .context=&gpio_Light };
 
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_binding_set[] = { &dt_SetDesiredPressure };
+static DX_DEVICE_TWIN_BINDING* device_twin_binding_set[] = { &dt_PressureAlertLevel };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the gx_initPeripheralAndHandlers function
-static DX_DIRECT_METHOD_BINDING *direct_method_binding_set[] = {  };
+static DX_DIRECT_METHOD_BINDING *direct_method_binding_set[] = { &dm_OfficeLightOn, &dm_OfficeLightOff };
 
 // All GPIOs referenced in gpio_bindings with be opened in the gx_initPeripheralAndHandlers function
-static DX_GPIO_BINDING *gpio_binding_set[] = { &gpio_ButtonA };
+static DX_GPIO_BINDING *gpio_binding_set[] = { &gpio_Light };
 
 // All timers referenced in timer_bindings will be opened in the gx_initPeripheralAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_binding_set[] = { &tmr_ButtonA, &tmr_MeasureTemperature };
+static DX_TIMER_BINDING *timer_binding_set[] = {  };
 
 // All timers referenced in timer_bindings_oneshot will be started in the gx_initPeripheralAndHandlers function
 static DX_TIMER_BINDING *timer_bindings_oneshot[] = {  };

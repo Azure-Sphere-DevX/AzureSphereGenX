@@ -126,15 +126,16 @@ class Builder():
 
         if os.path.exists(component_filename):
             with open(component_filename, 'r') as f:
-                template = json.load(f)
+                template = yaml.load(f, Loader=yaml.FullLoader)
         else:
             template = {}
 
         self.templates.update({component_name: template})
         name = binding.get('name')
-        signature_template = template.get('signature_template')
-        if signature_template is not None:
-            declare = signature_template.get('declare')
+        # signature_template = template.get('signature_template')
+        # if signature_template is not None:
+        #     declare = signature_template.get('declare')
+        declare = template.get('signature_template', 'SIGNATURE_MISSING')
 
         binding = {}
         binding.update({'name': name})

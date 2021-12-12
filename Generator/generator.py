@@ -1,6 +1,8 @@
 import json
 import pathlib
 import time
+
+from yaml.events import NodeEvent
 import watcher
 import hashlib
 import cleaner
@@ -105,6 +107,8 @@ def render_variable_block(f):
     device_twin_types = {"int": "DX_TYPE_INT", "float": "DX_TYPE_FLOAT", "double": "DX_TYPE_DOUBLE",
                          "bool": "DX_TYPE_BOOL",  "string": "DX_TYPE_STRING"}
 
+    bindings_tags = yaml.load(templates.get('declare_bindings_tag'), Loader=yaml.FullLoader)
+
     for item in variables_block:
         var = variables_block.get(item)
 
@@ -129,6 +133,17 @@ def render_variable_block(f):
 
         detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
         period = get_value(properties, 'period', '{ 0, 0 }')
+        context = get_value(properties, 'context', None)
+
+        context_name = ""
+        if context is not None:
+            context_name = context.get('name', '')
+            context_type = context.get('type', None)
+            if context_type is not None:
+                context_name_prefix = bindings_tags.get(context_type, None)
+                if context_name_prefix is not None:
+                    context_name = context_name_prefix + "_" + context_name
+            
 
         if template_key is None or templates.get(template_key) is None:
             print('Key: "{template_key}" not found'.format(
@@ -142,7 +157,8 @@ def render_variable_block(f):
                 invert=invert,
                 detect=detect,
                 twin_type=twin_type,
-                period=period
+                period=period,
+                context_name=context_name
             ))
 
         if properties is not None and properties.get('type', '').lower() == 'oneshot' and properties.get('autostart', False) == True:
@@ -163,6 +179,8 @@ def render_handler_block():
         var = handlers_block.get(item)
         binding = var.get('binding')
         type = None
+        lambda_property = ""
+        context_type = ""
 
         # if binding is not None and binding == key_binding:
 
@@ -170,6 +188,11 @@ def render_handler_block():
         properties = var.get('properties')
         if properties is not None:
             type = properties.get('type')
+            lambda_property = properties.get('lambda', '')
+            context = properties.get('context', None)
+            if context is not None:
+                context_type = context.get('type')
+       
 
         if does_handler_exist(code_lines=code_lines, handler=name):
             continue
@@ -182,7 +205,8 @@ def render_handler_block():
         else:
             try:
                 block_chars = templates.get(template_key).format(name=name, device_twins_updates=device_twins_updates,
-                                                                 device_twin_variables=device_twin_variables, type=type)
+                                                                 device_twin_variables=device_twin_variables, type=type, 
+                                                                 context_type=context_type, lambda_code=lambda_property)
             except:
                 print('ERROR: Problem formatting template "{template_key}". Check regular brackets in the template are escaped as {{{{.'.format(
                     template_key=template_key))
@@ -195,7 +219,8 @@ def render_handler_block():
             '/// GENX_BEGIN ID:{name} MD5:{hash}\n'.format(name=name, hash=hash_object.hexdigest()))
 
         code_lines.append(templates[template_key].format(name=name, device_twins_updates=device_twins_updates,
-                                                         device_twin_variables=device_twin_variables, type=type))
+                                                         device_twin_variables=device_twin_variables, type=type, 
+                                                         context_type=context_type, lambda_code=lambda_property))
         code_lines.append('\n/// GENX_END ID:{name}'.format(name=name))
         code_lines.append("\n\n")
 
@@ -233,7 +258,8 @@ def render_includes_block():
 
 
 def render_bindings(f):
-    bindings_tags = json.loads(templates.get('declare_bindings_tag'))
+    # bindings_tags = json.loads(templates.get('declare_bindings_tag'))
+    bindings_tags = yaml.load(templates.get('declare_bindings_tag'), Loader=yaml.FullLoader)
     for tag in bindings_tags:
         variable_list = ''
 
@@ -254,7 +280,7 @@ def render_autostart_timers(f):
 
     if autostart_timer_list != '':
         autostart_timer_list = autostart_timer_list[:-2]
-    f.write(templates.get('declare_bindings_timer_autostart_oneshot').format(
+    f.write(templates.get('declare_bindings_dx_timer_autostart_oneshot').format(
         autostart_timer_list=autostart_timer_list))
 
 

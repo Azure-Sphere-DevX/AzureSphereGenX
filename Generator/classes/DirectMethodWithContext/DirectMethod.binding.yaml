@@ -1,4 +1,4 @@
 ---
 variable_template:
   binding: DX_DIRECT_METHOD_BINDING
-  declare: declare_direct_method
+  declare: declare_direct_method_with_context

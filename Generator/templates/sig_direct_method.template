@@ -1,1 +1,1 @@
-static DX_DIRECT_METHOD_RESPONSE_CODE {name}_gx_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static DX_DECLARE_DIRECTMETHOD_HANDLER({name}_gx_handler);

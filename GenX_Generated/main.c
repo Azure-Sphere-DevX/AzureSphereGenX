@@ -47,141 +47,111 @@
 const char PNP_MODEL_ID[] = "dtmi:com:example:application;1";
 const char NETWORK_INTERFACE[] = "wlan0";
 
-
-
 /// <summary>
 ///  Initialize gpios, device twins, direct methods, timers.
 /// </summary>
-static void InitPeripheralAndHandlers(void) {{
-	dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
-	gx_initPeripheralAndHandlers();
+static void InitPeripheralAndHandlers(void)
+{
+	{
+		dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
+		gx_initPeripheralAndHandlers();
 
-	// Uncomment the StartWatchdog when ready for production
-	// StartWatchdog();
-}}
+		// Uncomment the StartWatchdog when ready for production
+		// StartWatchdog();
+	}
+}
 
 /// <summary>
 ///     Close Timers, GPIOs, Device Twins, Direct Methods
 /// </summary>
-static void ClosePeripheralAndHandlers(void) {{
-	dx_azureToDeviceStop();
-	gx_closePeripheralAndHandlers();
-	dx_timerEventLoopStop();
-}}
+static void ClosePeripheralAndHandlers(void)
+{
+	{
+		dx_azureToDeviceStop();
+		gx_closePeripheralAndHandlers();
+		dx_timerEventLoopStop();
+	}
+}
 
 /// <summary>
 ///  Main event loop for the app
 /// </summary>
-int main(int argc, char* argv[]) {{
-	dx_registerTerminationHandler();
-	if (!dx_configParseCmdLineArguments(argc, argv, &dx_config)) {{
+int main(int argc, char *argv[])
+{
+	{
+		dx_registerTerminationHandler();
+		if (!dx_configParseCmdLineArguments(argc, argv, &dx_config))
+		{
+			{
+				return dx_getTerminationExitCode();
+			}
+		}
+
+		InitPeripheralAndHandlers();
+
+		// Run the main event loop. This is a blocking call until termination requested
+		dx_eventLoopRun();
+
+		ClosePeripheralAndHandlers();
 		return dx_getTerminationExitCode();
-	}}
-
-	InitPeripheralAndHandlers();
-
-	// Main loop
-	while (!dx_isTerminationRequired()) {{
-		int result = EventLoop_Run(dx_timerGetEventLoop(), -1, true);
-		// Continue if interrupted by signal, e.g. due to breakpoint being set.
-		if (result == -1 && errno != EINTR) {{
-			dx_terminate(DX_ExitCode_Main_EventLoopFail);
-		}}
-	}}
-
-	ClosePeripheralAndHandlers();
-	return dx_getTerminationExitCode();
-}}
+	}
+}
 
 // Main code blocks
 
 
-/// GENX_BEGIN ID:SetDesiredPressure MD5:0f8a00a047f42fe4d548236695a75157
+/// GENX_BEGIN ID:PressureAlertLevel MD5:a2d1562ee3390682be1fb1a2665f324d
 /// <summary>
 /// What is the purpose of this device twin handler function?
 /// </summary>
 /// <param name="deviceTwinBinding"></param>
-static void SetDesiredPressure_gx_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
+static DX_DEFINE_DEVICETWIN_HANDLER(PressureAlertLevel_gx_handler, deviceTwinBinding)
 {
-	bool result = false;
-
-    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
-
-    // Checking the twinStateUpdated here will always be true.
-    // But it's useful property for other areas of your code.
-    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
-
-    void *value = deviceTwinBinding->twinState;
-
-	// The following is to cover all types from the generator
-
-	switch (deviceTwinBinding->twinType) {
-	case DX_TYPE_BOOL:
-		result = *(bool*)value;
-		Log_Debug("Device twin value: %d\n", *(bool*)value ? "True" : "False");
-		break;
-	case DX_TYPE_INT:
-		result = *(int*)value > 0 && *(int*)value < 100;
-		Log_Debug("Device twin value: %d\n", *(int*)value);
-		break;
-	case DX_TYPE_FLOAT:
-		result = *(float*)value > 0.0f && *(float*)value < 100.0f;
-		Log_Debug("Device twin value: %f\n", *(float*)value);
-		break;
-	case DX_TYPE_DOUBLE:
-		result = *(double*)value > 0.0 && *(double*)value < 100.0;
-		Log_Debug("Device twin value: %f\n", *(double*)value);
-		break;
-	case DX_TYPE_STRING:
-		result = !dx_isStringNullOrEmpty((char*)value);
-		Log_Debug("Device twin value: %s\n", (char*)value);
-		break;
-	default:
-		break;
-	}
-
-    if (result) {
-
-        // IMPLEMENT YOUR CODE HERE
-
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->propertyName);
+    void *value = deviceTwinBinding->propertyValue;
+    // Device twin pressure lambda
+    if (!IN_RANGE(*(float*)value, 800, 1100))
+    {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_ERROR);
     }
+
+    // implement your device twin logic
+
+    dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
+
 }
-/// GENX_END ID:SetDesiredPressure
+DX_END_DEVICETWIN_HANDLER
+/// GENX_END ID:PressureAlertLevel
 
 
-/// GENX_BEGIN ID:ButtonA MD5:f4ad977d757748a39b8bc73a4aec9001
+/// GENX_BEGIN ID:OfficeLightOn MD5:89e4eaba513885747956b3f95c2fbbde
 /// <summary>
-/// Implement your GPIO input timer function
+/// OfficeLightOn direct method purpose
 /// </summary>
-static void ButtonA_gx_handler(EventLoopTimer *eventLoopTimer) {
-    static GPIO_Value_Type gpio_ButtonANewState;
-
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }
-
-    if (dx_gpioStateGet(&gpio_ButtonA, &gpio_ButtonANewState)) {
-        Log_Debug("gpio_ButtonA: %d\n", gpio_ButtonANewState);
-    }
-}
-/// GENX_END ID:ButtonA
-
-
-/// GENX_BEGIN ID:MeasureTemperature MD5:a9d9eda494110a8cc6eb9ab4004226df
-/// <summary>
-/// Implement your timer function
-/// </summary>
-static DX_DEFINE_TIMER_HANDLER(MeasureTemperature_gx_handler)
+static DX_DEFINE_DIRECTMETHOD_HANDLER(OfficeLightOn_gx_handler, json, directMethodBinding, responseMsg)
 {
-    Log_Debug("Periodic timer MeasureTemperature_handler called\n");
+    DX_GPIO_BINDING context = (DX_GPIO_BINDING *)directMethodBinding->context;
 
-    // Implement your timer function
-    
-}
-DX_END_TIMER_HANDLER
-/// GENX_END ID:MeasureTemperature
+    dx_gpioOn(context);
+
+    return DX_METHOD_SUCCEEDED;
+}s
+DX_END_DIRECTMETHOD_HANDLER
+/// GENX_END ID:OfficeLightOn
+
+
+/// GENX_BEGIN ID:OfficeLightOff MD5:ca84e94f12b4b78e59241a07a2129421
+/// <summary>
+/// OfficeLightOff direct method purpose
+/// </summary>
+static DX_DEFINE_DIRECTMETHOD_HANDLER(OfficeLightOff_gx_handler, json, directMethodBinding, responseMsg)
+{
+    DX_GPIO_BINDING context = (DX_GPIO_BINDING *)directMethodBinding->context;
+
+    dx_gpioOff(context);
+
+    return DX_METHOD_SUCCEEDED;
+}s
+DX_END_DIRECTMETHOD_HANDLER
+/// GENX_END ID:OfficeLightOff
 
