@@ -132,7 +132,21 @@ def render_variable_block(f):
         twin_type = device_twin_types.get(twin_type, 'DX_TYPE_UNKNOWN')
 
         detect = get_value(properties, 'detect', 'DX_GPIO_DETECT_LOW')
-        period = get_value(properties, 'period', '{ 0, 0 }')
+
+        if properties is not None:
+            period = properties.get('period')
+            if period is not None:
+                seconds = period.get('seconds')
+                nanoseconds = period.get('nanoseconds')
+                if seconds is not None and nanoseconds is not None:
+                    if type(seconds) is int:
+                        seconds = str(seconds)
+                    if type(nanoseconds) is int:
+                        nanoseconds = str(nanoseconds)
+
+                    period = "{ " + seconds + ", " + nanoseconds + " }"
+                    properties['period'] = period
+
         context = get_value(properties, 'context', None)
 
         context_name = ""
@@ -264,13 +278,18 @@ def render_bindings(f):
         variable_list = ''
 
         var_list = binding_variables.get(tag, [])
+        if len(var_list) == 0:
+            continue
+
         for var in var_list:
             variable_list += '&' + bindings_tags.get(tag) + '_' + var + ', '
 
         if variable_list != '':
             variable_list = variable_list[:-2]
-        f.write(templates.get('declare_bindings_' +
-                tag.lower()).format(variables=variable_list))
+
+        declare_binding = templates.get('declare_bindings_' + tag.lower()).format(variables=variable_list)
+        if declare_binding is not None:
+            f.write(templates.get('declare_bindings_' + tag.lower()).format(variables=variable_list))
 
 
 def render_autostart_timers(f):
@@ -290,7 +309,7 @@ def write_main():
     if not os.path.isdir(generated_project_path + '/gx_includes'):
         os.mkdir(generated_project_path + '/gx_includes')
 
-    with open(generated_project_path + '/main.h', 'w') as df:
+    with open(generated_project_path + '/gx_includes/gx_bindings.h', 'w+') as df:
 
         df.write(templates["declarations"])
 
@@ -305,6 +324,8 @@ def write_main():
 
         render_bindings(df)
         render_autostart_timers(df)
+
+        footer = templates["declarations_footer"]
 
         df.write(templates["declarations_footer"])
 

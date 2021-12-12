@@ -3,7 +3,7 @@
 /// </summary>
 static DX_DEFINE_DIRECTMETHOD_HANDLER({name}_gx_handler, json, directMethodBinding, responseMsg) 
 {{
-    {lambda}   
+    {lambda_code}   
     // Example direct method with no payload
     // Implement your logic here
 

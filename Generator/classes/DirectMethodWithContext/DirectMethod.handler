@@ -4,9 +4,7 @@
 static DX_DEFINE_DIRECTMETHOD_HANDLER({name}_gx_handler, json, directMethodBinding, responseMsg)
 {{
     {context_type} context = ({context_type} *)directMethodBinding->context;
-
     {lambda_code}
-
     return DX_METHOD_SUCCEEDED;
-}}s
+}}
 DX_END_DIRECTMETHOD_HANDLER

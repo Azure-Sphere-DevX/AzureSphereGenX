@@ -33,7 +33,7 @@
  *
  ************************************************************************************************/
 
-#include "gx_includes/gx_declarations.h"
+#include "main.h"
 
 #include "app_exit_codes.h"
 
@@ -82,9 +82,7 @@ int main(int argc, char *argv[])
 		dx_registerTerminationHandler();
 		if (!dx_configParseCmdLineArguments(argc, argv, &dx_config))
 		{
-			{
-				return dx_getTerminationExitCode();
-			}
+			return dx_getTerminationExitCode();
 		}
 
 		InitPeripheralAndHandlers();
@@ -100,7 +98,7 @@ int main(int argc, char *argv[])
 // Main code blocks
 
 
-/// GENX_BEGIN ID:PressureAlertLevel MD5:a2d1562ee3390682be1fb1a2665f324d
+/// GENX_BEGIN ID:PressureAlertLevel MD5:9064ac54b264343134d043250a39f0ae
 /// <summary>
 /// What is the purpose of this device twin handler function?
 /// </summary>
@@ -109,7 +107,7 @@ static DX_DEFINE_DEVICETWIN_HANDLER(PressureAlertLevel_gx_handler, deviceTwinBin
 {
     Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->propertyName);
     void *value = deviceTwinBinding->propertyValue;
-    // Device twin pressure lambda
+    // Test device twin float is within range
     if (!IN_RANGE(*(float*)value, 800, 1100))
     {
         dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_ERROR);
@@ -124,34 +122,45 @@ DX_END_DEVICETWIN_HANDLER
 /// GENX_END ID:PressureAlertLevel
 
 
-/// GENX_BEGIN ID:OfficeLightOn MD5:89e4eaba513885747956b3f95c2fbbde
+/// GENX_BEGIN ID:OfficeLightOn MD5:20183fbd448dd3c7a6095c0653aa1d8e
 /// <summary>
 /// OfficeLightOn direct method purpose
 /// </summary>
 static DX_DEFINE_DIRECTMETHOD_HANDLER(OfficeLightOn_gx_handler, json, directMethodBinding, responseMsg)
 {
     DX_GPIO_BINDING context = (DX_GPIO_BINDING *)directMethodBinding->context;
-
     dx_gpioOn(context);
-
     return DX_METHOD_SUCCEEDED;
-}s
+}
 DX_END_DIRECTMETHOD_HANDLER
 /// GENX_END ID:OfficeLightOn
 
 
-/// GENX_BEGIN ID:OfficeLightOff MD5:ca84e94f12b4b78e59241a07a2129421
+/// GENX_BEGIN ID:FanOn MD5:c889b5c2ef38a0ee5b8a75ee84fdb7d5
 /// <summary>
-/// OfficeLightOff direct method purpose
+/// FanOn direct method purpose
 /// </summary>
-static DX_DEFINE_DIRECTMETHOD_HANDLER(OfficeLightOff_gx_handler, json, directMethodBinding, responseMsg)
+static DX_DEFINE_DIRECTMETHOD_HANDLER(FanOn_gx_handler, json, directMethodBinding, responseMsg)
 {
     DX_GPIO_BINDING context = (DX_GPIO_BINDING *)directMethodBinding->context;
-
-    dx_gpioOff(context);
-
+    dx_gpioOn(context);
     return DX_METHOD_SUCCEEDED;
-}s
+}
 DX_END_DIRECTMETHOD_HANDLER
-/// GENX_END ID:OfficeLightOff
+/// GENX_END ID:FanOn
+
+
+/// GENX_BEGIN ID:MeasureTemperature MD5:a822377b049818a5f19b50f26a48884c
+/// <summary>
+/// MeasureTemperature_gx_handler purpose?
+/// </summary>
+static DX_DEFINE_TIMER_HANDLER(MeasureTemperature_gx_handler)
+{
+    Log_Debug("Periodic timer MeasureTemperature_handler called\n");
+
+    // Implement your timer function
+    
+}
+DX_END_TIMER_HANDLER
+/// GENX_END ID:MeasureTemperature
 

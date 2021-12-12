@@ -1,5 +1,5 @@
 /// <summary>
-/// Implement your timer function
+/// {name}_gx_handler purpose?
 /// </summary>
 static DX_DEFINE_TIMER_HANDLER({name}_gx_handler)
 {{

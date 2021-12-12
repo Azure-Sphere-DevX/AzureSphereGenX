@@ -10,7 +10,7 @@ components:
     properties:
       type: float
       lambda: |
-        // Device twin pressure lambda
+        // Test device twin float is within range
             if (!IN_RANGE(*(float*)value, 800, 1100))
             {
                 dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_ERROR);
@@ -23,7 +23,8 @@ components:
     properties:
       type: int
       lambda: |
-        if (!IN_RANGE(*(int*)value, 0, 120))
+        // Test device twin int is within range
+            if (!IN_RANGE(*(int*)value, 0, 120))
             {
                 dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_ERROR);
             }
@@ -58,7 +59,7 @@ components:
 
   - name: OfficeLightOff
     class: DirectMethodWithContext
-    enabled: true
+    enabled: false
     properties:
       context:
         type: DX_GPIO_BINDING
@@ -66,12 +67,14 @@ components:
       lambda: dx_gpioOff(context);
 
   - name: ButtonA
-    class: GpioInput
+    class: GpioInputPoll
     enabled: false
     properties:
       pin: BUTTON_A
       detect: DX_GPIO_DETECT_LOW
-      period: "{ 0, 200 * ONE_MS }"
+      period:
+        seconds: 0
+        nanoseconds: 200 * ONE_MS
 
   - name: LightControl
     class: DirectMethod
@@ -85,16 +88,40 @@ components:
             }}
             bool state = (int)json_object_get_boolean(jsonObject, state_property);
 
-  - name: FanOff
-    class: DirectMethod
+  - name: Fan
+    class: GpioOutput
     enabled: false
+    properties:
+      pin: FAN_PIN
+      initialState: GPIO_Value_Low
+      invertPin: false
+
+  - name: FanOff
+    class: DirectMethodWithContext
+    enabled: false
+    properties:
+      context:
+        type: DX_GPIO_BINDING
+        name: Fan
+      lambda: dx_gpioOff(context);
+
+  - name: FanOn
+    class: DirectMethodWithContext
+    enabled: true
+    properties:
+      context:
+        type: DX_GPIO_BINDING
+        name: Fan
+      lambda: dx_gpioOn(context);
 
   - name: MeasureTemperature
     class: TimerPeriodic
-    enabled: false
+    enabled: true
     properties:
-      period: "{ 5, 0 }"
       type: periodic
+      period:
+        seconds: 5
+        nanoseconds: 0
 
   - name: Watchdog
     description: Watchdog on a 30 second refresh cadence
@@ -112,6 +139,8 @@ components:
 azure_iot:
   - name: glovebox-demo
     enabled: false
+    pnpModel: "dtmi:com:example:application;1"
+    networkInterface: "wlan0"
     manifest:
       CmdArgs:
         - "--ScopeID"
